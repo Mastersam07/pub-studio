@@ -5,24 +5,6 @@ import * as yaml from 'yaml';
 import * as child_process from 'child_process';
 import axios from 'axios';
 
-class FlutterScriptsProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
-	getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
-		return element;
-	}
-
-	getChildren(element?: vscode.TreeItem): Thenable<vscode.TreeItem[]> {
-		if (!element) {
-			return Promise.resolve(this.getScripts());
-		}
-		return Promise.resolve([]);
-	}
-
-	private getScripts(): vscode.TreeItem[] {
-		// Placeholder: Add logic to fetch and list scripts
-		return [new vscode.TreeItem('build'), new vscode.TreeItem('test')];
-	}
-}
-
 class FlutterActionsProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
 	getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
 		return element;
@@ -107,15 +89,12 @@ class FlutterDependenciesProvider implements vscode.TreeDataProvider<vscode.Tree
 	}
 }
 
-const scriptsProvider = new FlutterScriptsProvider();
 const actionsProvider = new FlutterActionsProvider();
 const dependenciesProvider = new FlutterDependenciesProvider(false);
 const devDependenciesProvider = new FlutterDependenciesProvider(true);
 
 export function activate(context: vscode.ExtensionContext) {
 
-
-	vscode.window.registerTreeDataProvider('scriptsView', scriptsProvider);
 	vscode.window.registerTreeDataProvider('actionsView', actionsProvider);
 	vscode.window.registerTreeDataProvider('dependenciesView', dependenciesProvider);
 	vscode.window.registerTreeDataProvider('devDependenciesView', devDependenciesProvider);
