@@ -39,6 +39,19 @@ export function activate(context: vscode.ExtensionContext) {
 			runScript(command);
 		})
 	);
+
+	// File watcher for pubspec.yaml
+	const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
+	if (workspaceFolder) {
+		const pubspecPath = path.join(workspaceFolder, 'pubspec.yaml');
+		const fileWatcher = vscode.workspace.createFileSystemWatcher(pubspecPath);
+
+		fileWatcher.onDidChange(() => packageManagerProvider.refresh());
+		fileWatcher.onDidCreate(() => packageManagerProvider.refresh());
+		fileWatcher.onDidDelete(() => packageManagerProvider.refresh());
+
+		context.subscriptions.push(fileWatcher);
+	}
 }
 
 

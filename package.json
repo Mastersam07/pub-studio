@@ -36,13 +36,11 @@
       },
       {
         "command": "pub-studio.updateDependency",
-        "title": "Update Dependency",
-        "enablement": "false"
+        "title": "Update Dependency"
       },
       {
         "command": "pub-studio.removeDependency",
-        "title": "Remove Dependency",
-        "enablement": "false"
+        "title": "Remove Dependency"
       }
     ],
     "viewsContainers": {
