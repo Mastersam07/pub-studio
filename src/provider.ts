@@ -14,13 +14,17 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 	getChildren(element?: vscode.TreeItem): Thenable<vscode.TreeItem[]> {
 		if (!element) {
 			return Promise.resolve(this.getSections());
-		} else if (element.label === 'Scripts') {
+		}
+
+		const label = typeof element.label === 'string' ? element.label : element.label?.label;
+
+		if (label?.startsWith('Scripts')) {
 			return Promise.resolve(this.getScripts());
-		} else if (element.label === 'Actions') {
+		} else if (label?.startsWith('Actions')) {
 			return Promise.resolve(this.getActions());
-		} else if (element.label === 'Dependencies') {
+		} else if (label?.startsWith('Dependencies')) {
 			return Promise.resolve(this.getDependencies(false));
-		} else if (element.label === 'Dev Dependencies') {
+		} else if (label?.startsWith('Dev Dependencies')) {
 			return Promise.resolve(this.getDependencies(true));
 		}
 		return Promise.resolve([]);
@@ -31,12 +35,32 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 
 		const scripts = new vscode.TreeItem('Scripts', vscode.TreeItemCollapsibleState.Expanded);
 		const actions = new vscode.TreeItem('Actions', vscode.TreeItemCollapsibleState.Expanded);
-		const dependencies = new vscode.TreeItem('Dependencies', vscode.TreeItemCollapsibleState.Expanded);
-		const devDependencies = new vscode.TreeItem('Dev Dependencies', vscode.TreeItemCollapsibleState.Expanded);
+		const dependenciesCount = this.getDependencyCount(false);
+		const dependencies = new vscode.TreeItem(`Dependencies (${dependenciesCount})`, vscode.TreeItemCollapsibleState.Expanded);
+		const devDependenciesCount = this.getDependencyCount(true);
+		const devDependencies = new vscode.TreeItem(`Dev Dependencies (${devDependenciesCount})`, vscode.TreeItemCollapsibleState.Expanded);
 
-		sections.push(scripts, actions, dependencies, devDependencies);
+		sections.push(scripts, new vscode.TreeItem(''), actions, new vscode.TreeItem(''), dependencies, new vscode.TreeItem(''), devDependencies);
 
 		return sections;
+	}
+
+	private getDependencyCount(isDevDependency: boolean): number {
+		const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
+		if (!workspaceFolder) {
+			return 0;
+		}
+
+		const pubspecPath = path.join(workspaceFolder, 'pubspec.yaml');
+		if (!fs.existsSync(pubspecPath)) {
+			return 0;
+		}
+
+		const fileContent = fs.readFileSync(pubspecPath, 'utf8');
+		const pubspec = yaml.parse(fileContent);
+		const dependencies = isDevDependency ? pubspec.dev_dependencies : pubspec.dependencies;
+
+		return Object.keys(dependencies || {}).length;
 	}
 
 	private getScripts(): vscode.TreeItem[] {
