@@ -1,18 +1,11 @@
 import * as vscode from 'vscode';
 import * as child_process from 'child_process';
-import { FlutterActionsProvider, FlutterDependenciesProvider, FlutterScriptsProvider } from './providers';
+import { PackageManagerProvider } from './provider';
 
 export function activate(context: vscode.ExtensionContext) {
+	const packageManagerProvider = new PackageManagerProvider();
 
-	const actionsProvider = new FlutterActionsProvider();
-	const dependenciesProvider = new FlutterDependenciesProvider(false);
-	const devDependenciesProvider = new FlutterDependenciesProvider(true);
-	const scriptProvider = new FlutterScriptsProvider();
-
-	vscode.window.registerTreeDataProvider('scriptsView', scriptProvider);
-	vscode.window.registerTreeDataProvider('actionsView', actionsProvider);
-	vscode.window.registerTreeDataProvider('dependenciesView', dependenciesProvider);
-	vscode.window.registerTreeDataProvider('devDependenciesView', devDependenciesProvider);
+	vscode.window.registerTreeDataProvider('packageManagerView', packageManagerProvider);
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('pub-studio.openFlutterPackageManager', () => {
@@ -22,16 +15,16 @@ export function activate(context: vscode.ExtensionContext) {
 			manageDependencies('flutter pub get');
 		}),
 		vscode.commands.registerCommand('pub-studio.addDependency', () => {
-			addDependency(false);
+			addDependency(false, packageManagerProvider);
 		}),
 		vscode.commands.registerCommand('pub-studio.addDevDependency', () => {
-			addDependency(true);
+			addDependency(true, packageManagerProvider);
 		}),
 		vscode.commands.registerCommand('pub-studio.updateDependency', (item: vscode.TreeItem) => {
-			updateDependency(item);
+			updateDependency(item, packageManagerProvider);
 		}),
 		vscode.commands.registerCommand('pub-studio.removeDependency', (item: vscode.TreeItem) => {
-			removeDependency(item, dependenciesProvider, devDependenciesProvider);
+			removeDependency(item, packageManagerProvider);
 		}),
 		vscode.commands.registerCommand('pub-studio.viewDependencyReadme', (item: vscode.TreeItem) => {
 			viewDependencyReadme(item);
@@ -58,7 +51,7 @@ function manageDependencies(command: string, callback?: () => void) {
 	});
 }
 
-function addDependency(isDev: boolean) {
+function addDependency(isDev: boolean, provider: PackageManagerProvider) {
 	vscode.window.showInputBox({ prompt: 'Enter package names to add (separate by comma)' })
 		.then(packageNames => {
 			if (packageNames) {
@@ -76,12 +69,13 @@ function addDependency(isDev: boolean) {
 						});
 					}
 					vscode.window.showInformationMessage(`Successfully added dependencies: ${packageNames}`);
+					provider.refresh();
 				});
 			}
 		});
 }
 
-function updateDependency(item: vscode.TreeItem) {
+function updateDependency(item: vscode.TreeItem, provider: PackageManagerProvider) {
 	const label = typeof item.label === 'string' ? item.label : item.label?.label;
 	if (!label) {
 		vscode.window.showErrorMessage('Invalid package name');
@@ -90,12 +84,10 @@ function updateDependency(item: vscode.TreeItem) {
 
 	const packageName = label.split(' ')[0];
 	const command = `flutter pub upgrade ${packageName}`;
-	manageDependencies(command);
+	manageDependencies(command, () => provider.refresh());
 }
 
-function removeDependency(item: vscode.TreeItem,
-	dependenciesProvider: FlutterDependenciesProvider,
-	devDependenciesProvider: FlutterDependenciesProvider) {
+function removeDependency(item: vscode.TreeItem, provider: PackageManagerProvider) {
 	const label = typeof item.label === 'string' ? item.label : item.label?.label;
 	if (!label) {
 		vscode.window.showErrorMessage('Invalid package name');
@@ -104,10 +96,7 @@ function removeDependency(item: vscode.TreeItem,
 
 	const packageName = label.split(' ')[0];
 	const command = `flutter pub remove ${packageName}`;
-	manageDependencies(command, () => {
-		dependenciesProvider.refresh();
-		devDependenciesProvider.refresh();
-	});
+	manageDependencies(command, () => provider.refresh());
 }
 
 async function viewDependencyReadme(item: vscode.TreeItem) {

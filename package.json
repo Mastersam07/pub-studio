@@ -53,24 +53,8 @@
     "views": {
       "flutterPackageManager": [
         {
-          "id": "scriptsView",
-          "name": "Scripts",
-          "icon": "images/scripts.png"
-        },
-        {
-          "id": "actionsView",
-          "name": "Actions",
-          "icon": "images/actions.png"
-        },
-        {
-          "id": "dependenciesView",
-          "name": "Dependencies",
-          "icon": "images/dependencies.png"
-        },
-        {
-          "id": "devDependenciesView",
-          "name": "Dev Dependencies",
-          "icon": "images/dev_dependencies.png"
+          "id": "packageManagerView",
+          "name": "Flutter Package Manager"
         }
       ]
     },

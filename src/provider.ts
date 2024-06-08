@@ -3,33 +3,44 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'yaml';
 
-export class FlutterScriptsProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
+export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
+	private _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
+	readonly onDidChangeTreeData: vscode.Event<void> = this._onDidChangeTreeData.event;
+
 	getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
 		return element;
 	}
 
 	getChildren(element?: vscode.TreeItem): Thenable<vscode.TreeItem[]> {
 		if (!element) {
+			return Promise.resolve(this.getSections());
+		} else if (element.label === 'Scripts') {
 			return Promise.resolve(this.getScripts());
+		} else if (element.label === 'Actions') {
+			return Promise.resolve(this.getActions());
+		} else if (element.label === 'Dependencies') {
+			return Promise.resolve(this.getDependencies(false));
+		} else if (element.label === 'Dev Dependencies') {
+			return Promise.resolve(this.getDependencies(true));
 		}
 		return Promise.resolve([]);
+	}
+
+	private getSections(): vscode.TreeItem[] {
+		const sections: vscode.TreeItem[] = [];
+
+		const scripts = new vscode.TreeItem('Scripts', vscode.TreeItemCollapsibleState.Expanded);
+		const actions = new vscode.TreeItem('Actions', vscode.TreeItemCollapsibleState.Expanded);
+		const dependencies = new vscode.TreeItem('Dependencies', vscode.TreeItemCollapsibleState.Expanded);
+		const devDependencies = new vscode.TreeItem('Dev Dependencies', vscode.TreeItemCollapsibleState.Expanded);
+
+		sections.push(scripts, actions, dependencies, devDependencies);
+
+		return sections;
 	}
 
 	private getScripts(): vscode.TreeItem[] {
 		return [new vscode.TreeItem('clean'), new vscode.TreeItem('static analysis')];
-	}
-}
-
-export class FlutterActionsProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
-	getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
-		return element;
-	}
-
-	getChildren(element?: vscode.TreeItem): Thenable<vscode.TreeItem[]> {
-		if (!element) {
-			return Promise.resolve(this.getActions());
-		}
-		return Promise.resolve([]);
 	}
 
 	private getActions(): vscode.TreeItem[] {
@@ -44,29 +55,8 @@ export class FlutterActionsProvider implements vscode.TreeDataProvider<vscode.Tr
 
 		return [installAll, addDependency, addDevDependency];
 	}
-}
 
-export class FlutterDependenciesProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
-	private _isDevDependency: boolean;
-	private _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
-	readonly onDidChangeTreeData: vscode.Event<void> = this._onDidChangeTreeData.event;
-
-	constructor(isDevDependency: boolean) {
-		this._isDevDependency = isDevDependency;
-	}
-
-	getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
-		return element;
-	}
-
-	getChildren(element?: vscode.TreeItem): Thenable<vscode.TreeItem[]> {
-		if (!element) {
-			return Promise.resolve(this.getPackages());
-		}
-		return Promise.resolve([]);
-	}
-
-	private getPackages(): vscode.TreeItem[] {
+	private getDependencies(isDevDependency: boolean): vscode.TreeItem[] {
 		const packages: vscode.TreeItem[] = [];
 		const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
 		if (!workspaceFolder) {
@@ -83,11 +73,11 @@ export class FlutterDependenciesProvider implements vscode.TreeDataProvider<vsco
 		const fileContent = fs.readFileSync(pubspecPath, 'utf8');
 		const pubspec = yaml.parse(fileContent);
 
-		const dependencies = this._isDevDependency ? pubspec.dev_dependencies : pubspec.dependencies;
+		const dependencies = isDevDependency ? pubspec.dev_dependencies : pubspec.dependencies;
 
 		for (const [key, value] of Object.entries(dependencies || {})) {
 			const item = new vscode.TreeItem(`${key} ${value}`);
-			item.contextValue = this._isDevDependency ? 'devDependency' : 'dependency';
+			item.contextValue = isDevDependency ? 'devDependency' : 'dependency';
 			item.command = {
 				command: 'pub-studio.viewDependencyReadme',
 				title: 'View Dependency README',
