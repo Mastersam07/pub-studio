@@ -1,71 +1,77 @@
-# pub-studio README
+<div align="center">
+<h1>
+<img src="./assets/icon.png" alt="Pub Studio logo" width="250">
 
-This is the README for your extension "pub-studio". After writing up a brief description, we recommend including the following sections.
+<b>Pub Studio</b>
+</h1>
+
+[![Version](https://img.shields.io/visual-studio-marketplace/v/Mastersam.pub-studio?style=for-the-badge&colorA=252525&colorB=0079CC)](https://marketplace.visualstudio.com/items?itemName=Mastersam.pub-studio)
+[![Downloads](https://img.shields.io/visual-studio-marketplace/d/Mastersam.pub-studio?style=for-the-badge&colorA=252525&colorB=0079CC)](https://marketplace.visualstudio.com/items?itemName=Mastersam.pub-studio)
+
+Pub Studio is a Visual Studio Code extension designed to simplify the management of Flutter/Dart packages and plugins directly within the editor. This extension provides a seamless experience for developers, allowing them to manage dependencies, run scripts, and view package information without leaving the editor.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Scripts Management**: Easily run common Flutter and Dart scripts.
+- **Actions**: Add, update, or remove dependencies with ease.
+- **Dependencies**: View and manage your project's dependencies and dev dependencies.
+- **Integrated Pubspec Management**: Navigate to dependency definitions within the `pubspec.yaml` file.
 
-For example if there is an image subfolder under your extension project workspace:
+## Installation
 
-\!\[feature X\]\(images/feature-x.png\)
+To install Pub Studio:
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+1. Open Visual Studio Code.
+2. Go to the Extensions view by clicking on the Extensions icon in the Sidebar.
+3. Search for `Pub Studio`.
+4. Click on the `Install` button.
 
-## Requirements
+## Usage
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+### Sidebar Views
 
-## Extension Settings
+Pub Studio adds an icon to the VS Code sidebar. Clicking on this icon will open the Pub Studio panel, which includes sections for Scripts, Actions, Dependencies, and Dev Dependencies.
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+#### Scripts
 
-For example:
+- **Flutter Clean**.
+- **Static Analysis**.
+- **Dart Fix**: Applies fixes with `dart fix --apply`.
+- **Dart Format**.
 
-This extension contributes the following settings:
+#### Actions
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+- Installs all dependencies.
+- Add dependency(single or multiple).
+- Add Dev Dependency(single or multiple).
 
-## Known Issues
+#### Dependencies
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- **View Dependencies**: Displays all project dependencies. Right-click on a dependency to update or remove it.
+- **View Dev Dependencies**: Displays all dev dependencies. Right-click on a dev dependency to update or remove it.
 
-## Release Notes
+## Commands
 
-Users appreciate release notes as you update your extension.
+Pub Studio provides several commands accessible from the command palette (`Cmd+Shift+P` or `Ctrl+Shift+P`):
 
-### 1.0.0
+- `Pub Studio: Install All Dependencies`
+- `Pub Studio: Add Dependency`
+- `Pub Studio: Add Dev Dependency`
+- `Pub Studio: Update Dependency`
+- `Pub Studio: Remove Dependency`
 
-Initial release of ...
+## Configuration
 
-### 1.0.1
+No additional configuration is required. Pub Studio reads from your `pubspec.yaml` file to provide information about your dependencies and scripts.
 
-Fixed issue #.
+## Contributing
 
-### 1.1.0
+Contributions are welcome! Please fork the repository and submit pull requests for any enhancements or bug fixes.
 
-Added features X, Y, and Z.
+## License
+
+This extension is licensed under the MIT License.
 
 ---
 
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+For detailed documentation and contribution guidelines, please visit the [GitHub repository](https://github.com/Mastersam07/pub-studio).

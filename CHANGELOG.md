@@ -1,9 +1,27 @@
 # Change Log
 
-All notable changes to the "pub-studio" extension will be documented in this file.
+## 0.1.0
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+- Public release
 
 ## [Unreleased]
 
-- Initial release
+- Script: flutter clean
+- Script: upgrade dependencies
+- Script: static analysis
+- Script: dart format
+- Script: dart fix
+
+## [Unreleased]
+
+- Actions: add dependency, install all dependencies
+
+## [Unreleased]
+
+- Get and diplay number of dependencies
+- Get and diplay number of dependencies
+
+## [Unreleased]
+
+- Get all dependencies
+- Get all dev dependencies
