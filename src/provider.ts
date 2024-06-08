@@ -72,8 +72,10 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 
 	private getScripts(): vscode.TreeItem[] {
 		return [
-			this.createScriptItem('clean'),
-			this.createScriptItem('static analysis')
+			this.createScriptItem('Flutter Clean', 'flutter clean'),
+			this.createScriptItem('Static Analysis', 'dart analyze .'),
+			this.createScriptItem('Dart Fix', 'dart fix --apply'),
+			this.createScriptItem('Dart Format', 'dart format .')
 		];
 	}
 
@@ -127,9 +129,10 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 		return packages;
 	}
 
-	private createScriptItem(label: string): vscode.TreeItem {
+	private createScriptItem(label: string, command: string): vscode.TreeItem {
 		const item = new vscode.TreeItem(label);
 		item.iconPath = new vscode.ThemeIcon('terminal');
+		item.command = { command: 'pub-studio.runScript', title: label, arguments: [command] };
 		return item;
 	}
 
