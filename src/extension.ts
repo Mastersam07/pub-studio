@@ -57,11 +57,24 @@ function manageDependencies(command: string, callback?: () => void) {
 }
 
 function addDependency(isDev: boolean) {
-	vscode.window.showInputBox({ prompt: 'Enter package name to add' })
-		.then(packageName => {
-			if (packageName) {
-				const command = `flutter pub add ${packageName} ${isDev ? '--dev' : ''}`;
-				manageDependencies(command);
+	vscode.window.showInputBox({ prompt: 'Enter package names to add (separate by comma)' })
+		.then(packageNames => {
+			if (packageNames) {
+				const packages = packageNames.split(',').map(pkg => pkg.trim());
+				vscode.window.withProgress({
+					location: vscode.ProgressLocation.Notification,
+					title: "Adding dependencies",
+					cancellable: false
+				}, async (progress, token) => {
+					for (const packageName of packages) {
+						progress.report({ message: `Adding ${packageName}...` });
+						await new Promise<void>((resolve, reject) => {
+							const command = `flutter pub add ${packageName} ${isDev ? '--dev' : ''}`;
+							manageDependencies(command, resolve);
+						});
+					}
+					vscode.window.showInformationMessage(`Successfully added dependencies: ${packageNames}`);
+				});
 			}
 		});
 }
