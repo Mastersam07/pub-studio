@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('pub-studio.removeDependency', (item: vscode.TreeItem) => {
 			removeDependency(item, packageManagerProvider);
 		}),
-		vscode.commands.registerCommand('pub-studio.viewDependencyReadme', (item: vscode.TreeItem) => {
+		vscode.commands.registerCommand('pub-studio.viewDependency', (item: vscode.TreeItem) => {
 			revealDependencyInPubspec(item);
 		}),
 		vscode.commands.registerCommand('pub-studio.runScript', (command: string) => {

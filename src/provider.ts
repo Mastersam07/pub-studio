@@ -115,11 +115,12 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 		const dependencies = isDevDependency ? pubspec.dev_dependencies : pubspec.dependencies;
 
 		for (const [key, value] of Object.entries(dependencies || {})) {
-			const item = new vscode.TreeItem(`${key} ${value}`);
+			const formattedValue = this.formatDependencyValue(value);
+			const item = new vscode.TreeItem(`${key} ${formattedValue}`);
 			item.contextValue = isDevDependency ? 'devDependency' : 'dependency';
 			item.command = {
-				command: 'pub-studio.viewDependencyReadme',
-				title: 'View Dependency README',
+				command: 'pub-studio.viewDependency',
+				title: 'View Dependency',
 				arguments: [item]
 			};
 			item.iconPath = new vscode.ThemeIcon('library');
@@ -127,6 +128,31 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 		}
 
 		return packages;
+	}
+
+	private formatDependencyValue(value: any): string {
+		if (typeof value === 'string') {
+			return value;
+		} else if (value && typeof value === 'object') {
+			if (value.git) {
+				return `[git ${this.formatGitDependency(value.git)}]`;
+			} else if (value.path) {
+				return `[path ${value.path}]`;
+			} else if (value.sdk) {
+				return `[sdk ${value.sdk}]`;
+			}
+			return JSON.stringify(value);
+		}
+		return String(value);
+	}
+
+	private formatGitDependency(git: any): string {
+		if (typeof git === 'string') {
+			return git;
+		} else if (typeof git === 'object') {
+			return `${git.url}${git.ref ? `#${git.ref}` : ''}`;
+		}
+		return JSON.stringify(git);
 	}
 
 	private createScriptItem(label: string, command: string): vscode.TreeItem {
