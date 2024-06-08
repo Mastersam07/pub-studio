@@ -121,7 +121,31 @@ function updateDependency(item: vscode.TreeItem, provider: PackageManagerProvide
 
 	const packageName = label.split(' ')[0];
 	const command = `flutter pub upgrade ${packageName}`;
-	manageDependencies(command, () => provider.refresh());
+	vscode.window.withProgress({
+		location: vscode.ProgressLocation.Notification,
+		title: `Updating dependency: ${packageName}`,
+		cancellable: false
+	}, async (_, __) => {
+		try {
+			await new Promise<void>((resolve, reject) => {
+				manageDependencies(command, (err) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve();
+					}
+				});
+			});
+			vscode.window.showInformationMessage(`Successfully updated dependency: ${packageName}`);
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			vscode.window.showErrorMessage(`Error updating dependency: ${errorMessage}`);
+			outputChannel.appendLine(`Error updating dependency: ${errorMessage}`);
+			outputChannel.show();
+		} finally {
+			provider.refresh();
+		}
+	});
 }
 
 function removeDependency(item: vscode.TreeItem, provider: PackageManagerProvider) {
@@ -134,7 +158,31 @@ function removeDependency(item: vscode.TreeItem, provider: PackageManagerProvide
 
 	const packageName = label.split(' ')[0];
 	const command = `flutter pub remove ${packageName}`;
-	manageDependencies(command, () => provider.refresh());
+	vscode.window.withProgress({
+		location: vscode.ProgressLocation.Notification,
+		title: `Removing dependency: ${packageName}`,
+		cancellable: false
+	}, async (_, __) => {
+		try {
+			await new Promise<void>((resolve, reject) => {
+				manageDependencies(command, (err) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve();
+					}
+				});
+			});
+			vscode.window.showInformationMessage(`Successfully removed dependency: ${packageName}`);
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			vscode.window.showErrorMessage(`Error removing dependency: ${errorMessage}`);
+			outputChannel.appendLine(`Error removing dependency: ${errorMessage}`);
+			outputChannel.show();
+		} finally {
+			provider.refresh();
+		}
+	});
 }
 
 async function revealDependencyInPubspec(item: vscode.TreeItem) {
