@@ -3,6 +3,23 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'yaml';
 
+export class FlutterScriptsProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
+	getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
+		return element;
+	}
+
+	getChildren(element?: vscode.TreeItem): Thenable<vscode.TreeItem[]> {
+		if (!element) {
+			return Promise.resolve(this.getScripts());
+		}
+		return Promise.resolve([]);
+	}
+
+	private getScripts(): vscode.TreeItem[] {
+		return [new vscode.TreeItem('clean'), new vscode.TreeItem('static analysis')];
+	}
+}
+
 export class FlutterActionsProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
 	getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
 		return element;

@@ -1,13 +1,15 @@
 import * as vscode from 'vscode';
 import * as child_process from 'child_process';
-import { FlutterActionsProvider, FlutterDependenciesProvider } from './providers';
+import { FlutterActionsProvider, FlutterDependenciesProvider, FlutterScriptsProvider } from './providers';
 
 export function activate(context: vscode.ExtensionContext) {
 
 	const actionsProvider = new FlutterActionsProvider();
 	const dependenciesProvider = new FlutterDependenciesProvider(false);
 	const devDependenciesProvider = new FlutterDependenciesProvider(true);
+	const scriptProvider = new FlutterScriptsProvider();
 
+	vscode.window.registerTreeDataProvider('scriptsView', scriptProvider);
 	vscode.window.registerTreeDataProvider('actionsView', actionsProvider);
 	vscode.window.registerTreeDataProvider('dependenciesView', dependenciesProvider);
 	vscode.window.registerTreeDataProvider('devDependenciesView', devDependenciesProvider);
@@ -125,5 +127,5 @@ async function viewDependencyReadme(item: vscode.TreeItem) {
 		}
 	);
 
-	// TODO: Load readme in vs code
+	// TODO: Load readme
 }
