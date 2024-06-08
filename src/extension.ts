@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import * as child_process from 'child_process';
 import { PackageManagerProvider } from './provider';
+import * as path from 'path';
+import * as fs from 'fs';
 
 let outputChannel: vscode.OutputChannel;
 
@@ -31,7 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
 			removeDependency(item, packageManagerProvider);
 		}),
 		vscode.commands.registerCommand('pub-studio.viewDependencyReadme', (item: vscode.TreeItem) => {
-			viewDependencyReadme(item);
+			revealDependencyInPubspec(item);
 		}),
 		vscode.commands.registerCommand('pub-studio.runScript', (command: string) => {
 			runScript(command);
@@ -40,33 +42,23 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 
-function manageDependencies(command: string, callback?: () => void) {
+function manageDependencies(command: string, callback?: (err?: Error) => void) {
 	const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
 	if (!workspaceFolder) {
 		vscode.window.showErrorMessage('No workspace folder found');
+		if (callback) callback(new Error('No workspace folder found'));
 		return;
 	}
-	vscode.window.withProgress({
-		location: vscode.ProgressLocation.Notification,
-		title: `Running ${command}`,
-		cancellable: false
-	}, (_, __) => {
-		return new Promise<void>((resolve, reject) => {
-			child_process.exec(command, { cwd: workspaceFolder }, (err, stdout, stderr) => {
-				if (err) {
-					outputChannel.appendLine(`Error running command: ${command}\n${stderr}`);
-					outputChannel.show();
-					reject();
-				} else {
-					outputChannel.appendLine(stdout);
-					outputChannel.show();
-					if (callback) {
-						callback();
-					}
-					resolve();
-				}
-			});
-		});
+	child_process.exec(command, { cwd: workspaceFolder }, (err, stdout, stderr) => {
+		if (err) {
+			outputChannel.appendLine(`Error running command: ${command}\n${stderr}`);
+			outputChannel.show();
+			if (callback) callback(err);
+		} else {
+			outputChannel.appendLine(stdout);
+			outputChannel.show();
+			if (callback) callback();
+		}
 	});
 }
 
@@ -75,20 +67,32 @@ function addDependency(isDev: boolean, provider: PackageManagerProvider) {
 		.then(packageNames => {
 			if (packageNames) {
 				const packages = packageNames.split(',').map(pkg => pkg.trim());
+				const command = `flutter pub add ${packages.join(' ')} ${isDev ? '--dev' : ''}`;
+
 				vscode.window.withProgress({
 					location: vscode.ProgressLocation.Notification,
 					title: "Adding dependencies",
 					cancellable: false
-				}, async (progress, __) => {
-					for (const packageName of packages) {
-						progress.report({ message: `Adding ${packageName}...` });
+				}, async (_, __) => {
+					try {
 						await new Promise<void>((resolve, reject) => {
-							const command = `flutter pub add ${packageName} ${isDev ? '--dev' : ''}`;
-							manageDependencies(command, resolve);
+							manageDependencies(command, (err) => {
+								if (err) {
+									reject(err);
+								} else {
+									resolve();
+								}
+							});
 						});
+						vscode.window.showInformationMessage(`Successfully added dependencies: ${packageNames}`);
+					} catch (error) {
+						const errorMessage = error instanceof Error ? error.message : String(error);
+						vscode.window.showErrorMessage(`Error adding dependencies: ${errorMessage}`);
+						outputChannel.appendLine(`Error adding dependencies: ${errorMessage}`);
+						outputChannel.show();
+					} finally {
+						provider.refresh();
 					}
-					vscode.window.showInformationMessage(`Successfully added dependencies: ${packageNames}`);
-					provider.refresh();
 				});
 			}
 		});
@@ -118,7 +122,7 @@ function removeDependency(item: vscode.TreeItem, provider: PackageManagerProvide
 	manageDependencies(command, () => provider.refresh());
 }
 
-async function viewDependencyReadme(item: vscode.TreeItem) {
+async function revealDependencyInPubspec(item: vscode.TreeItem) {
 	const label = typeof item.label === 'string' ? item.label : item.label?.label;
 	if (!label) {
 		vscode.window.showErrorMessage('Invalid package name');
@@ -126,15 +130,32 @@ async function viewDependencyReadme(item: vscode.TreeItem) {
 	}
 
 	const packageName = label.split(' ')[0];
-	const panel = vscode.window.createWebviewPanel(
-		'dependencyReadme',
-		`README: ${packageName}`,
-		vscode.ViewColumn.One,
-		{
-			enableScripts: true
-		}
-	);
-	// TODO: Load readme
+	const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
+	if (!workspaceFolder) {
+		vscode.window.showErrorMessage('No workspace folder found');
+		return;
+	}
+
+	const pubspecPath = path.join(workspaceFolder, 'pubspec.yaml');
+	if (!fs.existsSync(pubspecPath)) {
+		vscode.window.showErrorMessage('pubspec.yaml not found in workspace');
+		return;
+	}
+
+	const document = await vscode.workspace.openTextDocument(pubspecPath);
+	const editor = await vscode.window.showTextDocument(document);
+
+	const text = document.getText();
+	const regex = new RegExp(`\\b${packageName}:`, 'g');
+	const match = regex.exec(text);
+
+	if (match) {
+		const position = document.positionAt(match.index);
+		editor.selection = new vscode.Selection(position, position);
+		editor.revealRange(new vscode.Range(position, position));
+	} else {
+		vscode.window.showErrorMessage(`Dependency ${packageName} not found in pubspec.yaml`);
+	}
 }
 
 function runScript(command: string) {

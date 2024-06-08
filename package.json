@@ -1,44 +1,48 @@
 {
   "name": "pub-studio",
   "displayName": "PUB STUDIO",
-  "description": "Manage your flutter/dart packages directly from the editor. Quickly find, install, update, or remove packages without touching the command line.",
+  "description": "Manage your flutter/dart packages directly from the editor. Quickly find, install, update, or remove packages without touching the command line. Perform other flutter related command without touching the command line.",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.90.0"
+    "vscode": "^1.50.0"
   },
   "categories": [
     "Other"
+  ],
+  "keywords": [
+    "pubspec",
+    "dart",
+    "flutter",
+    "pub",
+    "dependency",
+    "package",
+    "pubspec assist",
+    "yaml"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "pub-studio.openFlutterPackageManager",
-        "title": "Open Pub Studio"
-      },
-      {
-        "command": "pub-studio.viewDependencyReadme",
-        "title": "View Dependency README"
-      },
-      {
         "command": "pub-studio.installAllDependencies",
-        "title": "Install All Dependencies"
+        "title": "Pub Studio: Install All Dependencies"
       },
       {
         "command": "pub-studio.addDependency",
-        "title": "Add Dependency"
+        "title": "Pub Studio: Add Dependency"
       },
       {
         "command": "pub-studio.addDevDependency",
-        "title": "Add Dev Dependency"
+        "title": "Pub Studio: Add Dev Dependency"
       },
       {
         "command": "pub-studio.updateDependency",
-        "title": "Update Dependency"
+        "title": "Update Dependency",
+        "enablement": "false"
       },
       {
         "command": "pub-studio.removeDependency",
-        "title": "Remove Dependency"
+        "title": "Remove Dependency",
+        "enablement": "false"
       }
     ],
     "viewsContainers": {
@@ -62,22 +66,12 @@
       "view/item/context": [
         {
           "command": "pub-studio.updateDependency",
-          "when": "viewItem == dependency",
+          "when": "viewItem == dependency || viewItem == devDependency",
           "group": "1_modification"
         },
         {
           "command": "pub-studio.removeDependency",
-          "when": "viewItem == dependency",
-          "group": "2_modification"
-        },
-        {
-          "command": "pub-studio.updateDependency",
-          "when": "viewItem == devDependency",
-          "group": "1_modification"
-        },
-        {
-          "command": "pub-studio.removeDependency",
-          "when": "viewItem == devDependency",
+          "when": "viewItem == dependency || viewItem == devDependency",
           "group": "2_modification"
         }
       ]
