@@ -112,6 +112,7 @@ function addDependency(isDev: boolean, provider: PackageManagerProvider) {
 }
 
 function updateDependency(item: vscode.TreeItem, provider: PackageManagerProvider) {
+	if (!item) return;
 	const label = typeof item.label === 'string' ? item.label : item.label?.label;
 	if (!label) {
 		vscode.window.showErrorMessage('Invalid package name');
@@ -124,6 +125,7 @@ function updateDependency(item: vscode.TreeItem, provider: PackageManagerProvide
 }
 
 function removeDependency(item: vscode.TreeItem, provider: PackageManagerProvider) {
+	if (!item) return;
 	const label = typeof item.label === 'string' ? item.label : item.label?.label;
 	if (!label) {
 		vscode.window.showErrorMessage('Invalid package name');
