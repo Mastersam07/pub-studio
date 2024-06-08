@@ -16,15 +16,15 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 			return Promise.resolve(this.getSections());
 		}
 
-		const label = typeof element.label === 'string' ? element.label : element.label?.label;
+		const label = this.getLabel(element.label);
 
-		if (label?.startsWith('Scripts')) {
+		if (label.startsWith('Scripts')) {
 			return Promise.resolve(this.getScripts());
-		} else if (label?.startsWith('Actions')) {
+		} else if (label.startsWith('Actions')) {
 			return Promise.resolve(this.getActions());
-		} else if (label?.startsWith('Dependencies')) {
+		} else if (label.startsWith('Dependencies')) {
 			return Promise.resolve(this.getDependencies(false));
-		} else if (label?.startsWith('Dev Dependencies')) {
+		} else if (label.startsWith('Dev Dependencies')) {
 			return Promise.resolve(this.getDependencies(true));
 		}
 		return Promise.resolve([]);
@@ -162,6 +162,15 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 		item.iconPath = new vscode.ThemeIcon('terminal');
 		item.command = { command: 'pub-studio.runScript', title: label, arguments: [command] };
 		return item;
+	}
+
+	public getLabel(label: string | vscode.TreeItemLabel | undefined): string {
+		if (typeof label === 'string') {
+			return label;
+		} else if (label && typeof label === 'object') {
+			return label.label;
+		}
+		return '';
 	}
 
 	refresh(): void {

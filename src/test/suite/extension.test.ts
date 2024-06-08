@@ -1,15 +1,26 @@
 import * as assert from 'assert';
-
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
 import * as vscode from 'vscode';
-// import * as myExtension from '../../extension';
+import { PackageManagerProvider } from '../../provider';
 
 suite('Extension Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
-	test('Sample test', () => {
-		assert.strictEqual(-1, [1, 2, 3].indexOf(5));
-		assert.strictEqual(-1, [1, 2, 3].indexOf(0));
+	test('PackageManagerProvider should be created', () => {
+		const provider = new PackageManagerProvider();
+		assert.ok(provider);
+	});
+
+	test('Scripts section should have items', async () => {
+		const provider = new PackageManagerProvider();
+		const scriptsSection = (await provider.getChildren())[0];
+		assert.strictEqual(provider.getLabel(scriptsSection.label), 'Scripts');
+		const scripts = await provider.getChildren(scriptsSection);
+		assert.strictEqual(scripts.length, 6); // There are 6 scripts
+	});
+
+	test('Dependencies section should show counts', async () => {
+		const provider = new PackageManagerProvider();
+		const dependenciesSection = (await provider.getChildren()).find(section => provider.getLabel(section.label).startsWith('Dependencies'));
+		assert.ok(dependenciesSection);
 	});
 });
