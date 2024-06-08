@@ -2,7 +2,11 @@ import * as vscode from 'vscode';
 import * as child_process from 'child_process';
 import { PackageManagerProvider } from './provider';
 
+let outputChannel: vscode.OutputChannel;
+
 export function activate(context: vscode.ExtensionContext) {
+	outputChannel = vscode.window.createOutputChannel('PUB STUDIO');
+
 	const packageManagerProvider = new PackageManagerProvider();
 
 	vscode.window.registerTreeDataProvider('packageManagerView', packageManagerProvider);
@@ -28,6 +32,9 @@ export function activate(context: vscode.ExtensionContext) {
 		}),
 		vscode.commands.registerCommand('pub-studio.viewDependencyReadme', (item: vscode.TreeItem) => {
 			viewDependencyReadme(item);
+		}),
+		vscode.commands.registerCommand('pub-studio.runScript', (command: string) => {
+			runScript(command);
 		})
 	);
 }
@@ -39,15 +46,27 @@ function manageDependencies(command: string, callback?: () => void) {
 		vscode.window.showErrorMessage('No workspace folder found');
 		return;
 	}
-	child_process.exec(command, { cwd: workspaceFolder }, (err, stdout, stderr) => {
-		if (err) {
-			vscode.window.showErrorMessage(`Error running command: ${command}\n${stderr}`);
-		} else {
-			vscode.window.showInformationMessage(stdout);
-			if (callback) {
-				callback();
-			}
-		}
+	vscode.window.withProgress({
+		location: vscode.ProgressLocation.Notification,
+		title: `Running ${command}`,
+		cancellable: false
+	}, (_, __) => {
+		return new Promise<void>((resolve, reject) => {
+			child_process.exec(command, { cwd: workspaceFolder }, (err, stdout, stderr) => {
+				if (err) {
+					outputChannel.appendLine(`Error running command: ${command}\n${stderr}`);
+					outputChannel.show();
+					reject();
+				} else {
+					outputChannel.appendLine(stdout);
+					outputChannel.show();
+					if (callback) {
+						callback();
+					}
+					resolve();
+				}
+			});
+		});
 	});
 }
 
@@ -60,7 +79,7 @@ function addDependency(isDev: boolean, provider: PackageManagerProvider) {
 					location: vscode.ProgressLocation.Notification,
 					title: "Adding dependencies",
 					cancellable: false
-				}, async (progress, token) => {
+				}, async (progress, __) => {
 					for (const packageName of packages) {
 						progress.report({ message: `Adding ${packageName}...` });
 						await new Promise<void>((resolve, reject) => {
@@ -115,6 +134,32 @@ async function viewDependencyReadme(item: vscode.TreeItem) {
 			enableScripts: true
 		}
 	);
-
 	// TODO: Load readme
+}
+
+function runScript(command: string) {
+	const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
+	if (!workspaceFolder) {
+		vscode.window.showErrorMessage('No workspace folder found');
+		return;
+	}
+	vscode.window.withProgress({
+		location: vscode.ProgressLocation.Notification,
+		title: `Running ${command}`,
+		cancellable: false
+	}, (_, __) => {
+		return new Promise<void>((resolve, reject) => {
+			child_process.exec(command, { cwd: workspaceFolder }, (err, stdout, stderr) => {
+				if (err) {
+					outputChannel.appendLine(`Error running command: ${command}\n${stderr}`);
+					outputChannel.show();
+					reject();
+				} else {
+					outputChannel.appendLine(stdout);
+					outputChannel.show();
+					resolve();
+				}
+			});
+		});
+	});
 }
