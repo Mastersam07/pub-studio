@@ -72,10 +72,12 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 
 	private getScripts(): vscode.TreeItem[] {
 		return [
-			this.createScriptItem('Flutter Clean', 'flutter clean'),
-			this.createScriptItem('Static Analysis', 'dart analyze .'),
-			this.createScriptItem('Dart Fix', 'dart fix --apply'),
-			this.createScriptItem('Dart Format', 'dart format .')
+			this.createScriptItem('Flutter clean', 'flutter clean'),
+			this.createScriptItem('Upgrade dependencies', 'flutter pub upgrade --major-versions'),
+			this.createScriptItem('Static analysis', 'dart analyze .'),
+			this.createScriptItem('View available dart fixes', 'dart fix --dry-run'),
+			this.createScriptItem('Apply available dart fixes', 'dart fix --apply'),
+			this.createScriptItem('Format dart files', 'dart format .')
 		];
 	}
 
