@@ -34,13 +34,20 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 		const sections: vscode.TreeItem[] = [];
 
 		const scripts = new vscode.TreeItem('Scripts', vscode.TreeItemCollapsibleState.Expanded);
+		scripts.iconPath = new vscode.ThemeIcon('terminal-view-icon');
+
 		const actions = new vscode.TreeItem('Actions', vscode.TreeItemCollapsibleState.Expanded);
+		actions.iconPath = new vscode.ThemeIcon('tools');
+
 		const dependenciesCount = this.getDependencyCount(false);
 		const dependencies = new vscode.TreeItem(`Dependencies (${dependenciesCount})`, vscode.TreeItemCollapsibleState.Expanded);
+		dependencies.iconPath = new vscode.ThemeIcon('package');
+
 		const devDependenciesCount = this.getDependencyCount(true);
 		const devDependencies = new vscode.TreeItem(`Dev Dependencies (${devDependenciesCount})`, vscode.TreeItemCollapsibleState.Expanded);
+		devDependencies.iconPath = new vscode.ThemeIcon('package');
 
-		sections.push(scripts, new vscode.TreeItem(''), actions, new vscode.TreeItem(''), dependencies, new vscode.TreeItem(''), devDependencies);
+		sections.push(scripts, actions, new vscode.TreeItem(''), dependencies, devDependencies);
 
 		return sections;
 	}
@@ -64,18 +71,24 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 	}
 
 	private getScripts(): vscode.TreeItem[] {
-		return [new vscode.TreeItem('clean'), new vscode.TreeItem('static analysis')];
+		return [
+			this.createScriptItem('clean'),
+			this.createScriptItem('static analysis')
+		];
 	}
 
 	private getActions(): vscode.TreeItem[] {
 		const installAll = new vscode.TreeItem('Install All Dependencies');
 		installAll.command = { command: 'pub-studio.installAllDependencies', title: 'Install All Dependencies' };
+		installAll.iconPath = new vscode.ThemeIcon('cloud-download');
 
 		const addDependency = new vscode.TreeItem('Add Dependency');
 		addDependency.command = { command: 'pub-studio.addDependency', title: 'Add Dependency' };
+		addDependency.iconPath = new vscode.ThemeIcon('add');
 
 		const addDevDependency = new vscode.TreeItem('Add Dev Dependency');
 		addDevDependency.command = { command: 'pub-studio.addDevDependency', title: 'Add Dev Dependency' };
+		addDevDependency.iconPath = new vscode.ThemeIcon('add');
 
 		return [installAll, addDependency, addDevDependency];
 	}
@@ -107,10 +120,17 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 				title: 'View Dependency README',
 				arguments: [item]
 			};
+			item.iconPath = new vscode.ThemeIcon('library');
 			packages.push(item);
 		}
 
 		return packages;
+	}
+
+	private createScriptItem(label: string): vscode.TreeItem {
+		const item = new vscode.TreeItem(label);
+		item.iconPath = new vscode.ThemeIcon('terminal');
+		return item;
 	}
 
 	refresh(): void {
