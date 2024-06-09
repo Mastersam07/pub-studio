@@ -7,7 +7,7 @@ import * as fs from 'fs';
 let outputChannel: vscode.OutputChannel;
 
 export function activate(context: vscode.ExtensionContext) {
-	outputChannel = vscode.window.createOutputChannel('PUB STUDIO');
+	outputChannel = vscode.window.createOutputChannel('Pub Studio');
 
 	const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
 	const pubspecPath = path.join(workspaceFolder, 'pubspec.yaml');

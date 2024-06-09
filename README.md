@@ -1,27 +1,24 @@
 <div align="center">
 <h1>
-<img src="https://raw.githubusercontent.com/mastersam07/pub-studio/dev/pub-studio-code/assets/icon.png" alt="Pub Studio logo" width="250">
+<img src="./assets/icon.png" alt="Pub Studio logo" width="250">
 
 <b>Pub Studio</b>
 </h1>
 
 [![Version](https://img.shields.io/visual-studio-marketplace/v/Mastersam.pub-studio?style=for-the-badge&colorA=252525&colorB=0079CC)](https://marketplace.visualstudio.com/items?itemName=Mastersam.pub-studio)
-[![Installs](https://img.shields.io/visual-studio-marketplace/i/Mastersam.pub-studio?style=for-the-badge&colorA=252525&colorB=0079CC)](https://marketplace.visualstudio.com/items?itemName=Mastersam.pub-studio)
 [![Downloads](https://img.shields.io/visual-studio-marketplace/d/Mastersam.pub-studio?style=for-the-badge&colorA=252525&colorB=0079CC)](https://marketplace.visualstudio.com/items?itemName=Mastersam.pub-studio)
 
 </div>
-
->> Support for IntelliJ is WIP.
 
 ---
 
 <br/>
 
-![demo](https://raw.githubusercontent.com/mastersam07/pub-studio/dev/pub-studio-code/assets/demo.gif)
+![demo](https://raw.githubusercontent.com/mastersam07/pub-studio/dev/assets/demo.gif)
 
 ---
 
-Pub Studio is an extension designed to simplify the management of Flutter/Dart packages and plugins directly within the editor. This extension provides a seamless experience for developers, allowing them to manage dependencies, run scripts, and view package information without leaving the editor.
+Pub Studio is a Visual Studio Code extension designed to simplify the management of Flutter/Dart packages and plugins directly within the editor. This extension provides a seamless experience for developers, allowing them to manage dependencies, run scripts, and view package information without leaving the editor.
 
 ## Features
 
