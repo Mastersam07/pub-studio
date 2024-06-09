@@ -9,41 +9,43 @@ let outputChannel: vscode.OutputChannel;
 export function activate(context: vscode.ExtensionContext) {
 	outputChannel = vscode.window.createOutputChannel('PUB STUDIO');
 
-	const packageManagerProvider = new PackageManagerProvider();
-
-	vscode.window.registerTreeDataProvider('packageManagerView', packageManagerProvider);
-
-	context.subscriptions.push(
-		vscode.commands.registerCommand('pub-studio.openFlutterPackageManager', () => {
-			vscode.commands.executeCommand('workbench.view.extension.flutterPackageManager');
-		}),
-		vscode.commands.registerCommand('pub-studio.installAllDependencies', () => {
-			manageDependencies('flutter pub get');
-		}),
-		vscode.commands.registerCommand('pub-studio.addDependency', () => {
-			addDependency(false, packageManagerProvider);
-		}),
-		vscode.commands.registerCommand('pub-studio.addDevDependency', () => {
-			addDependency(true, packageManagerProvider);
-		}),
-		vscode.commands.registerCommand('pub-studio.updateDependency', (item: vscode.TreeItem) => {
-			updateDependency(item, packageManagerProvider);
-		}),
-		vscode.commands.registerCommand('pub-studio.removeDependency', (item: vscode.TreeItem) => {
-			removeDependency(item, packageManagerProvider);
-		}),
-		vscode.commands.registerCommand('pub-studio.viewDependency', (item: vscode.TreeItem) => {
-			revealDependencyInPubspec(item);
-		}),
-		vscode.commands.registerCommand('pub-studio.runScript', (command: string) => {
-			runScript(command);
-		})
-	);
-
-	// File watcher for pubspec.yaml
 	const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
-	if (workspaceFolder) {
-		const pubspecPath = path.join(workspaceFolder, 'pubspec.yaml');
+	const pubspecPath = path.join(workspaceFolder, 'pubspec.yaml');
+
+	if (workspaceFolder && fs.existsSync(pubspecPath)) {
+
+		const packageManagerProvider = new PackageManagerProvider();
+
+		vscode.window.registerTreeDataProvider('packageManagerView', packageManagerProvider);
+
+		context.subscriptions.push(
+			vscode.commands.registerCommand('pub-studio.openFlutterPackageManager', () => {
+				vscode.commands.executeCommand('workbench.view.extension.flutterPackageManager');
+			}),
+			vscode.commands.registerCommand('pub-studio.installAllDependencies', () => {
+				manageDependencies('flutter pub get');
+			}),
+			vscode.commands.registerCommand('pub-studio.addDependency', () => {
+				addDependency(false, packageManagerProvider);
+			}),
+			vscode.commands.registerCommand('pub-studio.addDevDependency', () => {
+				addDependency(true, packageManagerProvider);
+			}),
+			vscode.commands.registerCommand('pub-studio.updateDependency', (item: vscode.TreeItem) => {
+				updateDependency(item, packageManagerProvider);
+			}),
+			vscode.commands.registerCommand('pub-studio.removeDependency', (item: vscode.TreeItem) => {
+				removeDependency(item, packageManagerProvider);
+			}),
+			vscode.commands.registerCommand('pub-studio.viewDependency', (item: vscode.TreeItem) => {
+				revealDependencyInPubspec(item);
+			}),
+			vscode.commands.registerCommand('pub-studio.runScript', (command: string) => {
+				runScript(command);
+			})
+		);
+
+		// File watcher for pubspec.yaml
 		const fileWatcher = vscode.workspace.createFileSystemWatcher(pubspecPath);
 
 		fileWatcher.onDidChange(() => packageManagerProvider.refresh());
