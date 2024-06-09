@@ -10,4 +10,5 @@ vsc-extension-quickstart.md
 **/*.ts
 .nyc_output
 assets/*.mp4
+assets/*.gif
 *.vsix

@@ -14,7 +14,7 @@
 
 <br/>
 
-![demo](./assets/demo.mp4)
+![demo](https://raw.githubusercontent.com/mastersam07/pub-studio/dev/assets/demo.gif)
 
 ---
 
