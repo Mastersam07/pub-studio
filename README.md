@@ -10,6 +10,14 @@
 
 </div>
 
+---
+
+<br/>
+
+![demo](./assets/demo.mp4)
+
+---
+
 Pub Studio is a Visual Studio Code extension designed to simplify the management of Flutter/Dart packages and plugins directly within the editor. This extension provides a seamless experience for developers, allowing them to manage dependencies, run scripts, and view package information without leaving the editor.
 
 ## Features
@@ -70,24 +78,15 @@ No additional configuration is required. Pub Studio reads from your `pubspec.yam
 
 ### Managing Dependencies
 
-<div align="center">
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/i3nR5dfxI78?autoplay=1&mute=1" frameborder="0"
-        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
+[![Managing Dependencies](https://img.youtube.com/vi/i3nR5dfxI78/0.jpg)](https://youtu.be/i3nR5dfxI78)
 
 ### Running Scripts
 
-<div align="center">
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/IiNp89YnDRg?autoplay=1&mute=1" frameborder="0"
-        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
+[![Running Scripts](https://img.youtube.com/vi/IiNp89YnDRg/0.jpg)](https://youtu.be/IiNp89YnDRg)
 
 ### Adding Dependencies
 
-<div align="center">
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/V0zHUy6oXKI?autoplay=1&mute=1" frameborder="0"
-        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
+[![Adding Dependencies](https://img.youtube.com/vi/V0zHUy6oXKI/0.jpg)](https://youtu.be/V0zHUy6oXKI)
 
 ## Contributing
 

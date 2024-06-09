@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.2
+
+- Reduce size
+
 ## 0.1.0
 
 - Activation event (on workspace containing pubspec.yaml)

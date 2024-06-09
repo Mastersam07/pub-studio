@@ -9,3 +9,5 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 .nyc_output
+assets/*.mp4
+*.vsix
