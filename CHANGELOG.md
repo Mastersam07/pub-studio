@@ -2,6 +2,7 @@
 
 ## 0.1.0
 
+- Activation event (on workspace containing pubspec.yaml)
 - Public release
 
 ## [Unreleased]

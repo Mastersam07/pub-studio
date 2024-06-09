@@ -66,9 +66,38 @@ Pub Studio provides several commands accessible from the command palette (`Cmd+S
 
 No additional configuration is required. Pub Studio reads from your `pubspec.yaml` file to provide information about your dependencies and scripts.
 
+## Demonstration
+
+### Managing Dependencies
+
+<div align="center">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/i3nR5dfxI78?autoplay=1&mute=1" frameborder="0"
+        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+
+### Running Scripts
+
+<div align="center">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/IiNp89YnDRg?autoplay=1&mute=1" frameborder="0"
+        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+
+### Adding Dependencies
+
+<div align="center">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/V0zHUy6oXKI?autoplay=1&mute=1" frameborder="0"
+        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+
 ## Contributing
 
 Contributions are welcome! Please fork the repository and submit pull requests for any enhancements or bug fixes.
+
+## Star Our Repository
+
+If you find Pub Studio useful, please consider starring our repository on GitHub! Your support helps us continue to improve the extension.
+
+[![GitHub stars](https://img.shields.io/github/stars/Mastersam07/pub-studio?style=social)](https://github.com/Mastersam07/pub-studio/stargazers)
 
 ## License
 
