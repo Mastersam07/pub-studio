@@ -1,5 +1,13 @@
 # Change Log
 
+## 0.1.4
+
+- Sort dependencies
+
+## 0.1.3
+
+-
+
 ## 0.1.2
 
 - Reduce size

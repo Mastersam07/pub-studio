@@ -3,6 +3,7 @@ import * as child_process from 'child_process';
 import { PackageManagerProvider } from './provider';
 import * as path from 'path';
 import * as fs from 'fs';
+import { parseDocument, YAMLMap } from 'yaml';
 
 let outputChannel: vscode.OutputChannel;
 
@@ -23,7 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
 				vscode.commands.executeCommand('workbench.view.extension.flutterPackageManager');
 			}),
 			vscode.commands.registerCommand('pub-studio.installAllDependencies', () => {
-				manageDependencies('flutter pub get');
+				manageDependencies('flutter pub get', (_) => sortPubspecDependencies());
 			}),
 			vscode.commands.registerCommand('pub-studio.addDependency', () => {
 				addDependency(false, packageManagerProvider);
@@ -87,7 +88,7 @@ function addDependency(isDev: boolean, provider: PackageManagerProvider) {
 				vscode.window.withProgress({
 					location: vscode.ProgressLocation.Notification,
 					title: "Adding dependencies",
-					cancellable: false
+					cancellable: true
 				}, async (_, __) => {
 					try {
 						await new Promise<void>((resolve, reject) => {
@@ -95,6 +96,7 @@ function addDependency(isDev: boolean, provider: PackageManagerProvider) {
 								if (err) {
 									reject(err);
 								} else {
+									sortPubspecDependencies();
 									resolve();
 								}
 							});
@@ -126,7 +128,7 @@ function updateDependency(item: vscode.TreeItem, provider: PackageManagerProvide
 	vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
 		title: `Updating dependency: ${packageName}`,
-		cancellable: false
+		cancellable: true
 	}, async (_, __) => {
 		try {
 			await new Promise<void>((resolve, reject) => {
@@ -134,6 +136,7 @@ function updateDependency(item: vscode.TreeItem, provider: PackageManagerProvide
 					if (err) {
 						reject(err);
 					} else {
+						sortPubspecDependencies();
 						resolve();
 					}
 				});
@@ -163,7 +166,7 @@ function removeDependency(item: vscode.TreeItem, provider: PackageManagerProvide
 	vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
 		title: `Removing dependency: ${packageName}`,
-		cancellable: false
+		cancellable: true
 	}, async (_, __) => {
 		try {
 			await new Promise<void>((resolve, reject) => {
@@ -171,6 +174,7 @@ function removeDependency(item: vscode.TreeItem, provider: PackageManagerProvide
 					if (err) {
 						reject(err);
 					} else {
+						sortPubspecDependencies();
 						resolve();
 					}
 				});
@@ -232,7 +236,7 @@ function runScript(command: string) {
 	vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
 		title: `Running ${command}`,
-		cancellable: false
+		cancellable: true
 	}, (_, __) => {
 		return new Promise<void>((resolve, reject) => {
 			child_process.exec(command, { cwd: workspaceFolder }, (err, stdout, stderr) => {
@@ -248,4 +252,46 @@ function runScript(command: string) {
 			});
 		});
 	});
+}
+
+function sortPubspecDependencies() {
+	const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
+	if (!workspaceFolder) {
+		return;
+	}
+
+	const pubspecPath = path.join(workspaceFolder, 'pubspec.yaml');
+	if (!fs.existsSync(pubspecPath)) {
+		return;
+	}
+
+	const fileContent = fs.readFileSync(pubspecPath, 'utf8');
+	const doc = parseDocument(fileContent);
+
+	const dependencies = doc.get('dependencies') as YAMLMap | undefined;
+	const devDependencies = doc.get('dev_dependencies') as YAMLMap | undefined;
+
+	if (dependencies) {
+		const sortedDependencies = sortMapKeys(dependencies);
+		doc.set('dependencies', sortedDependencies);
+	}
+
+	if (devDependencies) {
+		const sortedDevDependencies = sortMapKeys(devDependencies);
+		doc.set('dev_dependencies', sortedDevDependencies);
+	}
+
+	const newYamlContent = doc.toString();
+	fs.writeFileSync(pubspecPath, newYamlContent, 'utf8');
+}
+
+function sortMapKeys(map: YAMLMap): YAMLMap {
+	const sortedMap = new YAMLMap();
+	const sortedKeys = map.items.sort((a, b) => {
+		const keyA = String(a.key);
+		const keyB = String(b.key);
+		return keyA.localeCompare(keyB);
+	});
+	sortedMap.items = sortedKeys;
+	return sortedMap;
 }
