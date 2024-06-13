@@ -86,6 +86,10 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 		installAll.command = { command: 'pub-studio.installAllDependencies', title: 'Install All Dependencies' };
 		installAll.iconPath = new vscode.ThemeIcon('cloud-download');
 
+		const sortDependencies = new vscode.TreeItem('Sort All Dependencies');
+		sortDependencies.command = { command: 'pub-studio.sortDependencies', title: 'Sort All Dependencies' };
+		sortDependencies.iconPath = new vscode.ThemeIcon('sort-precedence');
+
 		const addDependency = new vscode.TreeItem('Add Dependency');
 		addDependency.command = { command: 'pub-studio.addDependency', title: 'Add Dependency' };
 		addDependency.iconPath = new vscode.ThemeIcon('add');
@@ -94,7 +98,7 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 		addDevDependency.command = { command: 'pub-studio.addDevDependency', title: 'Add Dev Dependency' };
 		addDevDependency.iconPath = new vscode.ThemeIcon('add');
 
-		return [installAll, addDependency, addDevDependency];
+		return [installAll, sortDependencies, addDependency, addDevDependency];
 	}
 
 	private getDependencies(isDevDependency: boolean): vscode.TreeItem[] {

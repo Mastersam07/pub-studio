@@ -48,6 +48,10 @@
         "title": "Pub Studio: Install All Dependencies"
       },
       {
+        "command": "pub-studio.sortDependencies",
+        "title": "Pub Studio: Sort All Dependencies"
+      },
+      {
         "command": "pub-studio.addDependency",
         "title": "Pub Studio: Add Dependency"
       },

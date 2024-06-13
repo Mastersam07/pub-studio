@@ -32,6 +32,9 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.commands.registerCommand('pub-studio.addDevDependency', () => {
 				addDependency(true, packageManagerProvider);
 			}),
+			vscode.commands.registerCommand('pub-studio.sortDependencies', () => {
+				sortPubspecDependencies();
+			}),
 			vscode.commands.registerCommand('pub-studio.updateDependency', (item: vscode.TreeItem) => {
 				updateDependency(item, packageManagerProvider);
 			}),
