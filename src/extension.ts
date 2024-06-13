@@ -57,6 +57,13 @@ export function activate(context: vscode.ExtensionContext) {
 		fileWatcher.onDidDelete(() => packageManagerProvider.refresh());
 
 		context.subscriptions.push(fileWatcher);
+
+		// Configuration change listener for custom commands
+		context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(event => {
+			if (event.affectsConfiguration('pubStudio.customCommands')) {
+				packageManagerProvider.refresh();
+			}
+		}));
 	}
 }
 

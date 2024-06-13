@@ -52,6 +52,7 @@ Pub Studio adds an icon to the VS Code sidebar. Clicking on this icon will open 
 #### Actions
 
 - Installs all dependencies.
+- Sort all dependencies.
 - Add dependency(single or multiple).
 - Add Dev Dependency(single or multiple).
 
@@ -65,10 +66,31 @@ Pub Studio adds an icon to the VS Code sidebar. Clicking on this icon will open 
 Pub Studio provides several commands accessible from the command palette (`Cmd+Shift+P` or `Ctrl+Shift+P`):
 
 - `Pub Studio: Install All Dependencies`
+- `Pub Studio: Sort All Dependencies`
 - `Pub Studio: Add Dependency`
 - `Pub Studio: Add Dev Dependency`
 - `Pub Studio: Update Dependency`
 - `Pub Studio: Remove Dependency`
+
+## Custom Commands Support
+
+Pub Studio now supports custom commands defined in your VS Code `settings.json`. These commands will appear in the Scripts section of the Pub Studio panel, allowing you to run them directly from VS Code.
+
+### How to Use
+
+1. Open your `settings.json` file in VS Code.
+2. Add your custom commands under `pubStudio.customCommands`.
+
+Example `settings.json`:
+```json
+{
+    "pubStudio.customCommands": {
+        "Run Custom Command 1": "echo Custom Command 1",
+        "Run Custom Command 2": "echo Custom Command 2"
+    }
+}
+```
+
 
 ## Configuration
 

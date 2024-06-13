@@ -70,6 +70,15 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 		return Object.keys(dependencies || {}).length;
 	}
 
+	private getCustomCommands(): vscode.TreeItem[] {
+		const customCommands = vscode.workspace.getConfiguration('pubStudio').get<{ [key: string]: string }>('customCommands', {});
+
+		return Object.keys(customCommands).map(key => {
+			const command = customCommands[key];
+			return this.createScriptItem(key, command);
+		});
+	}
+
 	private getScripts(): vscode.TreeItem[] {
 		return [
 			this.createScriptItem('Flutter clean', 'flutter clean'),
@@ -77,7 +86,8 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 			this.createScriptItem('Static analysis', 'dart analyze .'),
 			this.createScriptItem('View available dart fixes', 'dart fix --dry-run'),
 			this.createScriptItem('Apply available dart fixes', 'dart fix --apply'),
-			this.createScriptItem('Format dart files', 'dart format .')
+			this.createScriptItem('Format dart files', 'dart format .'),
+			...this.getCustomCommands()
 		];
 	}
 
