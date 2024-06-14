@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.94
+
+- Bug fixes
+
 ## 0.1.5
 
 - Sort dependencies

@@ -2,7 +2,7 @@
   "name": "pub-studio",
   "displayName": "PUB STUDIO",
   "description": "Manage your flutter/dart packages directly from the editor. Quickly find, install, update, or remove packages without touching the command line. Perform other flutter related command without touching the command line.",
-  "version": "0.1.5",
+  "version": "0.1.94",
   "publisher": "Mastersam",
   "license": "MIT",
   "author": {
