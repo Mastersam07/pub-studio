@@ -5,16 +5,25 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { parseDocument, YAMLMap } from 'yaml';
 import { glob } from 'glob';
+import { promptForRating } from './rating';
+import { sortMapKeys } from './utils';
 
 let outputChannel: vscode.OutputChannel;
 
 export function activate(context: vscode.ExtensionContext) {
 	outputChannel = vscode.window.createOutputChannel('Pub Studio');
 
+	const TIME_THRESHOLD = 7 * 24 * 60 * 60 * 1000;
+
 	const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
 	const pubspecPath = path.join(workspaceFolder, 'pubspec.yaml');
 
 	if (workspaceFolder && fs.existsSync(pubspecPath)) {
+
+		const firstUse = context.globalState.get<number>('firstUse', Date.now());
+		const now = Date.now();
+
+		context.globalState.update('firstUse', firstUse);
 
 		const packageManagerProvider = new PackageManagerProvider();
 
@@ -68,6 +77,10 @@ export function activate(context: vscode.ExtensionContext) {
 				packageManagerProvider.refresh();
 			}
 		}));
+
+		if (now - firstUse >= TIME_THRESHOLD) {
+			promptForRating();
+		}
 	}
 }
 
@@ -299,16 +312,7 @@ function sortPubspecDependencies() {
 	fs.writeFileSync(pubspecPath, newYamlContent, 'utf8');
 }
 
-function sortMapKeys(map: YAMLMap): YAMLMap {
-	const sortedMap = new YAMLMap();
-	const sortedKeys = map.items.sort((a, b) => {
-		const keyA = String(a.key);
-		const keyB = String(b.key);
-		return keyA.localeCompare(keyB);
-	});
-	sortedMap.items = sortedKeys;
-	return sortedMap;
-}
+
 
 async function removeUnusedDependencies() {
 	const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
