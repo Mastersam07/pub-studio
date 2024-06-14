@@ -53,6 +53,7 @@ Pub Studio adds an icon to the VS Code sidebar. Clicking on this icon will open 
 
 - Installs all dependencies.
 - Sort all dependencies.
+- Remove unused dependencies.
 - Add dependency(single or multiple).
 - Add Dev Dependency(single or multiple).
 
@@ -67,6 +68,7 @@ Pub Studio provides several commands accessible from the command palette (`Cmd+S
 
 - `Pub Studio: Install All Dependencies`
 - `Pub Studio: Sort All Dependencies`
+- `Pub Studio: Remove Unused Dependencies`
 - `Pub Studio: Add Dependency`
 - `Pub Studio: Add Dev Dependency`
 - `Pub Studio: Update Dependency`

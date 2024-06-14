@@ -1,8 +1,8 @@
 # Change Log
 
-## 0.1.94
+## 0.2.0
 
-- Bug fixes
+- Remove unused dependencies
 
 ## 0.1.5
 

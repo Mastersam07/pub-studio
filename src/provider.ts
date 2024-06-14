@@ -108,7 +108,11 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 		addDevDependency.command = { command: 'pub-studio.addDevDependency', title: 'Add Dev Dependency' };
 		addDevDependency.iconPath = new vscode.ThemeIcon('add');
 
-		return [installAll, sortDependencies, addDependency, addDevDependency];
+		const removeUnusedDependencies = new vscode.TreeItem('Remove Unused Dependencies');
+		removeUnusedDependencies.command = { command: 'pub-studio.removeUnusedDependencies', title: 'Remove Unused Dependencies' };
+		removeUnusedDependencies.iconPath = new vscode.ThemeIcon('trash');
+
+		return [installAll, sortDependencies, addDependency, addDevDependency, removeUnusedDependencies];
 	}
 
 	private getDependencies(isDevDependency: boolean): vscode.TreeItem[] {

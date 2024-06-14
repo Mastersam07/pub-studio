@@ -4,6 +4,7 @@ import { PackageManagerProvider } from './provider';
 import * as path from 'path';
 import * as fs from 'fs';
 import { parseDocument, YAMLMap } from 'yaml';
+import { glob } from 'glob';
 
 let outputChannel: vscode.OutputChannel;
 
@@ -25,6 +26,9 @@ export function activate(context: vscode.ExtensionContext) {
 			}),
 			vscode.commands.registerCommand('pub-studio.installAllDependencies', () => {
 				manageDependencies('flutter pub get', (_) => sortPubspecDependencies());
+			}),
+			vscode.commands.registerCommand('pub-studio.removeUnusedDependencies', () => {
+				removeUnusedDependencies();
 			}),
 			vscode.commands.registerCommand('pub-studio.addDependency', () => {
 				addDependency(false, packageManagerProvider);
@@ -304,4 +308,83 @@ function sortMapKeys(map: YAMLMap): YAMLMap {
 	});
 	sortedMap.items = sortedKeys;
 	return sortedMap;
+}
+
+async function removeUnusedDependencies() {
+	const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
+	if (!workspaceFolder) {
+		vscode.window.showErrorMessage('No workspace folder found');
+		return;
+	}
+
+	const pubspecPath = path.join(workspaceFolder, 'pubspec.yaml');
+	if (!fs.existsSync(pubspecPath)) {
+		vscode.window.showErrorMessage('pubspec.yaml not found in workspace');
+		return;
+	}
+
+	vscode.window.withProgress({
+		location: vscode.ProgressLocation.Notification,
+		title: 'Removing unused dependencies',
+		cancellable: false
+	}, async (_, __) => {
+		try {
+			const usedDependencies = await findUsedDependencies(workspaceFolder);
+			const fileContent = fs.readFileSync(pubspecPath, 'utf8');
+			const doc = parseDocument(fileContent);
+
+			const dependencies = doc.get('dependencies') as YAMLMap;
+			const devDependencies = doc.get('dev_dependencies') as YAMLMap;
+
+			const allDependencies = { ...dependencies?.toJSON(), ...devDependencies?.toJSON() };
+			const unusedDependencies = Object.keys(allDependencies).filter(dep => !usedDependencies.has(dep));
+
+			if (unusedDependencies.length > 0) {
+				unusedDependencies.forEach(dep => {
+					if (dependencies) {
+						dependencies.delete(dep);
+					}
+					if (devDependencies) {
+						devDependencies.delete(dep);
+					}
+				});
+
+				const newYamlContent = String(doc);
+				fs.writeFileSync(pubspecPath, newYamlContent, 'utf8');
+
+				vscode.window.showInformationMessage(`Removed unused dependencies: ${unusedDependencies.join(', ')}`);
+				sortPubspecDependencies();
+			} else {
+				vscode.window.showInformationMessage('No unused dependencies found');
+			}
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			vscode.window.showErrorMessage(`Error removing unused dependencies: ${errorMessage}`);
+			outputChannel.appendLine(`Error removing unused dependencies: ${errorMessage}`);
+			outputChannel.show();
+		}
+	});
+}
+
+async function findUsedDependencies(workspaceFolder: string): Promise<Set<string>> {
+	try {
+		const files = await glob(`${workspaceFolder}/**/*.dart`, { ignore: 'node_modules/**' });
+		const usedDependencies = new Set<string>();
+
+		for (const file of files) {
+			const content = await fs.readFileSync(file, 'utf8');
+			const matches = content.match(/import\s+['"]package:([^\/]+)\//g);
+			if (matches) {
+				matches.forEach(match => {
+					const dep = match.split('/')[0].replace(/import\s+['"]package:/, '');
+					usedDependencies.add(dep);
+				});
+			}
+		}
+
+		return usedDependencies;
+	} catch (err) {
+		console.error('Error finding used dependencies:', err);
+		throw err;
+	}
 }
