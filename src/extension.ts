@@ -81,6 +81,17 @@ export function activate(context: vscode.ExtensionContext) {
 		if (now - firstUse >= TIME_THRESHOLD) {
 			promptForRating();
 		}
+
+		const makefilePath = path.join(workspaceFolder, 'Makefile');
+		if (workspaceFolder && fs.existsSync(makefilePath)) {
+
+			// File watcher for Makefile
+			const fileWatcher = vscode.workspace.createFileSystemWatcher(makefilePath);
+
+			fileWatcher.onDidChange(() => packageManagerProvider.refresh());
+			fileWatcher.onDidCreate(() => packageManagerProvider.refresh());
+			fileWatcher.onDidDelete(() => packageManagerProvider.refresh());
+		}
 	}
 }
 

@@ -79,6 +79,42 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 		});
 	}
 
+	private getCommandsFromMakefile(): vscode.TreeItem[] {
+		const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
+		if (!workspaceFolder) {
+			return [];
+		}
+
+		const makefilePath = path.join(workspaceFolder, 'Makefile');
+		if (!fs.existsSync(makefilePath)) {
+			return [];
+		}
+
+		const fileContent = fs.readFileSync(makefilePath, 'utf8');
+
+		const firstTargetRegex = new RegExp('(^[a-zA-Z0-9_.][a-zA-Z0-9-_]+):', 'g');
+		const firstTarget = firstTargetRegex.exec(fileContent)?.[0];
+
+		let commands = [];
+
+		if (firstTarget) {
+			commands.push(this.createMakefileTargetScriptItem(firstTarget));
+		}
+
+		const regex = new RegExp('([\n\r][a-zA-Z0-9_.][a-zA-Z0-9-_]+):', 'g');
+		let match;
+
+		while (match = regex.exec(fileContent)) {
+			commands.push(this.createMakefileTargetScriptItem(match[0]));
+		}
+		return commands;
+	}
+
+	private createMakefileTargetScriptItem(target: string): vscode.TreeItem {
+		target = target.substring(0, target.length - 1).trim();
+		return this.createScriptItem(target, `make ${target}`);
+	}
+
 	private getScripts(): vscode.TreeItem[] {
 		return [
 			this.createScriptItem('Flutter clean', 'flutter clean'),
@@ -87,7 +123,8 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 			this.createScriptItem('View available dart fixes', 'dart fix --dry-run'),
 			this.createScriptItem('Apply available dart fixes', 'dart fix --apply'),
 			this.createScriptItem('Format dart files', 'dart format .'),
-			...this.getCustomCommands()
+			...this.getCustomCommands(),
+			...this.getCommandsFromMakefile(),
 		];
 	}
 
