@@ -349,18 +349,14 @@ async function removeUnusedDependencies() {
 			const doc = parseDocument(fileContent);
 
 			const dependencies = doc.get('dependencies') as YAMLMap;
-			const devDependencies = doc.get('dev_dependencies') as YAMLMap;
 
-			const allDependencies = { ...dependencies?.toJSON(), ...devDependencies?.toJSON() };
+			const allDependencies = { ...dependencies?.toJSON() };
 			const unusedDependencies = Object.keys(allDependencies).filter(dep => !usedDependencies.has(dep));
 
 			if (unusedDependencies.length > 0) {
 				unusedDependencies.forEach(dep => {
 					if (dependencies) {
 						dependencies.delete(dep);
-					}
-					if (devDependencies) {
-						devDependencies.delete(dep);
 					}
 				});
 

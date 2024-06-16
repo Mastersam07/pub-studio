@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.2
+
+- Fix: exempt dev dependency while removing unused dependencies
+
 ## 0.2.1
 
 - Makefile support for custom scripts

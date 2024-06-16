@@ -12,3 +12,4 @@ vsc-extension-quickstart.md
 assets/*.mp4
 assets/*.gif
 *.vsix
+node_modules/
