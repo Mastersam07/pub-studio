@@ -26,6 +26,8 @@ Pub Studio is a Visual Studio Code extension designed to simplify the management
 - **Actions**: Add, update, or remove dependencies with ease.
 - **Dependencies**: View and manage your project's dependencies and dev dependencies.
 - **Integrated Pubspec Management**: Navigate to dependency definitions within the `pubspec.yaml` file.
+- **Makefile Support**: Automatically detect and add Makefile targets to scripts.
+- **Custom Commands**: Support for custom commands defined in `settings.json`.
 
 ## Installation
 
@@ -48,6 +50,8 @@ Pub Studio adds an icon to the VS Code sidebar. Clicking on this icon will open 
 - **Static Analysis**.
 - **Dart Fix**: Applies fixes with `dart fix --apply`.
 - **Dart Format**.
+- **Makefile Targets**: Automatically detected and added from your Makefile.
+- **Custom Commands**: Defined in your `settings.json`.
 
 #### Actions
 
@@ -91,6 +95,24 @@ Example `settings.json`:
         "Run Custom Command 2": "echo Custom Command 2"
     }
 }
+```
+
+## Makefile Support
+
+Pub Studio also supports Makefile targets. It automatically detects targets in your Makefile and adds them to the Scripts section, allowing you to run them directly from Pub Studio.
+
+
+Example `Makefile`:
+
+```makefile
+.PHONY: clean build
+
+clean:
+    flutter clean
+
+build:
+    flutter build apk
+
 ```
 
 

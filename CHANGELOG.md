@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.1
+
+- Makefile support for custom scripts
+
 ## 0.2.0
 
 - Remove unused dependencies
@@ -7,7 +11,7 @@
 ## 0.1.5
 
 - Sort dependencies
-- Add custom dependencies
+- Add custom commands
 
 ## 0.1.2
 
