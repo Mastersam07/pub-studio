@@ -384,10 +384,21 @@ async function findUsedDependencies(workspaceFolder: string): Promise<Set<string
 
 		for (const file of files) {
 			const content = await fs.readFileSync(file, 'utf8');
-			const matches = content.match(/import\s+['"]package:([^\/]+)\//g);
-			if (matches) {
-				matches.forEach(match => {
+
+			// Check for import statements
+			const importMatches = content.match(/import\s+['"]package:([^\/]+)\//g);
+			if (importMatches) {
+				importMatches.forEach(match => {
 					const dep = match.split('/')[0].replace(/import\s+['"]package:/, '');
+					usedDependencies.add(dep);
+				});
+			}
+
+			// Check for export statements
+			const exportMatches = content.match(/export\s+['"]package:([^\/]+)\//g);
+			if (exportMatches) {
+				exportMatches.forEach(match => {
+					const dep = match.split('/')[0].replace(/export\s+['"]package:/, '');
 					usedDependencies.add(dep);
 				});
 			}

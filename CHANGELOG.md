@@ -1,8 +1,9 @@
 # Change Log
 
-## 0.2.2
+## 0.2.4
 
 - Fix: exempt dev dependency while removing unused dependencies
+- Fix: check for export statements
 
 ## 0.2.1
 
