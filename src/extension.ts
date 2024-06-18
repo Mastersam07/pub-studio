@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import { parseDocument, YAMLMap } from 'yaml';
 import { glob } from 'glob';
 import { promptForRating } from './rating';
-import { sortMapKeys } from './utils';
+import { showPackageInputBox, sortMapKeys } from './utils';
 
 let outputChannel: vscode.OutputChannel;
 
@@ -117,41 +117,41 @@ function manageDependencies(command: string, callback?: (err?: Error) => void) {
 }
 
 function addDependency(isDev: boolean, provider: PackageManagerProvider) {
-	vscode.window.showInputBox({ prompt: 'Enter package names to add (separate by comma)' })
-		.then(packageNames => {
-			if (packageNames) {
-				const packages = packageNames.split(',').map(pkg => pkg.trim());
-				const command = `flutter pub add ${packages.join(' ')} ${isDev ? '--dev' : ''}`;
+	showPackageInputBox(isDev).then(packageNames => {
+		if (packageNames) {
+			const packages = packageNames.split(',').map(pkg => pkg.trim());
+			const command = `flutter pub add ${packages.join(' ')} ${isDev ? '--dev' : ''}`;
 
-				vscode.window.withProgress({
-					location: vscode.ProgressLocation.Notification,
-					title: "Adding dependencies",
-					cancellable: true
-				}, async (_, __) => {
-					try {
-						await new Promise<void>((resolve, reject) => {
-							manageDependencies(command, (err) => {
-								if (err) {
-									reject(err);
-								} else {
-									sortPubspecDependencies();
-									resolve();
-								}
-							});
+			vscode.window.withProgress({
+				location: vscode.ProgressLocation.Notification,
+				title: `Adding dependencies ${packages}`,
+				cancellable: true
+			}, async (_, __) => {
+				try {
+					await new Promise<void>((resolve, reject) => {
+						manageDependencies(command, (err) => {
+							if (err) {
+								reject(err);
+							} else {
+								sortPubspecDependencies();
+								resolve();
+							}
 						});
-						vscode.window.showInformationMessage(`Successfully added dependencies: ${packageNames}`);
-					} catch (error) {
-						const errorMessage = error instanceof Error ? error.message : String(error);
-						vscode.window.showErrorMessage(`Error adding dependencies: ${errorMessage}`);
-						outputChannel.appendLine(`Error adding dependencies: ${errorMessage}`);
-						outputChannel.show();
-					} finally {
-						provider.refresh();
-					}
-				});
-			}
-		});
+					});
+					vscode.window.showInformationMessage(`Successfully added dependencies: ${packageNames}`);
+				} catch (error) {
+					const errorMessage = error instanceof Error ? error.message : String(error);
+					vscode.window.showErrorMessage(`Error adding dependencies: ${errorMessage}`);
+					outputChannel.appendLine(`Error adding dependencies: ${errorMessage}`);
+					outputChannel.show();
+				} finally {
+					provider.refresh();
+				}
+			});
+		}
+	});
 }
+
 
 function updateDependency(item: vscode.TreeItem, provider: PackageManagerProvider) {
 	if (!item) return;
