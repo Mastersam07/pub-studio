@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.2.5
+
+- Feat: show suggestions on add package
+- Feat: add remove unused imports action
+
 ## 0.2.4
 
 - Fix: exempt dev dependency while removing unused dependencies
