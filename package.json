@@ -70,6 +70,10 @@
       {
         "command": "pub-studio.removeDependency",
         "title": "Pub Studio: Remove Dependency"
+      },
+      {
+        "command": "pub-studio.findRemoveUnusedImports",
+        "title": "Pub Studio: Remove Unused Imports"
       }
     ],
     "viewsContainers": {

@@ -149,7 +149,11 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 		removeUnusedDependencies.command = { command: 'pub-studio.removeUnusedDependencies', title: 'Remove Unused Dependencies' };
 		removeUnusedDependencies.iconPath = new vscode.ThemeIcon('trash');
 
-		return [installAll, sortDependencies, addDependency, addDevDependency, removeUnusedDependencies];
+		const removeUnusedImports = new vscode.TreeItem('Remove Unused Imports');
+		removeUnusedImports.command = { command: 'pub-studio.findRemoveUnusedImports', title: 'Remove Unused Imports' };
+		removeUnusedImports.iconPath = new vscode.ThemeIcon('trash');
+
+		return [installAll, sortDependencies, addDependency, addDevDependency, removeUnusedDependencies, removeUnusedImports];
 	}
 
 	private getDependencies(isDevDependency: boolean): vscode.TreeItem[] {
