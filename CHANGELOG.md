@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.2.6
+
+- Fix: unneccessary prompt
+
 ## 0.2.5
 
 - Feat: show suggestions on add package

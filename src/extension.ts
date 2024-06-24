@@ -86,7 +86,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}));
 
 		if (now - firstUse >= TIME_THRESHOLD) {
-			promptForRating();
+			promptForRating(context);
 		}
 
 		const makefilePath = path.join(workspaceFolder, 'Makefile');
