@@ -12,6 +12,26 @@ import { removeUnusedDependencies } from './commands/removeUnusedDependencies';
 import { revealDependencyInPubspec } from './commands/revealDependency';
 import { findRemoveUnusedImports } from './commands/findRemoveUnusedImports';
 
+function findNestedWorkspaces(rootPath: string): string[] {
+    const nestedWorkspaces: string[] = [];
+    const folders = fs.readdirSync(rootPath, { withFileTypes: true });
+
+    folders.forEach(folder => {
+        if (folder.isDirectory()) {
+            const folderPath = path.join(rootPath, folder.name);
+            const pubspecPath = path.join(folderPath, 'pubspec.yaml');
+
+            if (fs.existsSync(pubspecPath)) {
+                nestedWorkspaces.push(folderPath);
+            } else {
+                nestedWorkspaces.push(...findNestedWorkspaces(folderPath));
+            }
+        }
+    });
+
+    return nestedWorkspaces;
+}
+
 let outputChannel: vscode.OutputChannel;
 
 export function activate(context: vscode.ExtensionContext) {
@@ -22,14 +42,16 @@ export function activate(context: vscode.ExtensionContext) {
 	const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
 	const pubspecPath = path.join(workspaceFolder, 'pubspec.yaml');
 
-	if (workspaceFolder && fs.existsSync(pubspecPath)) {
+	const nestedWorkspaces = findNestedWorkspaces(workspaceFolder);
+
+	if (workspaceFolder && (fs.existsSync(pubspecPath) || nestedWorkspaces.length > 0)) {
 
 		const firstUse = context.globalState.get<number>('firstUse', Date.now());
 		const now = Date.now();
 
 		context.globalState.update('firstUse', firstUse);
 
-		const packageManagerProvider = new PackageManagerProvider();
+		const packageManagerProvider = new PackageManagerProvider(nestedWorkspaces);
 
 		vscode.window.registerTreeDataProvider('packageManagerView', packageManagerProvider);
 

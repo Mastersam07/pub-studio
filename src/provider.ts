@@ -3,9 +3,27 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'yaml';
 
+class NestedWorkspaceItem extends vscode.TreeItem {
+    constructor(
+        public readonly label: string,
+        public readonly workspacePath: string,
+        public readonly collapsibleState: vscode.TreeItemCollapsibleState
+    ) {
+        super(label, collapsibleState);
+        this.iconPath = new vscode.ThemeIcon('folder');
+        this.contextValue = 'nestedWorkspace';
+    }
+}
+
 export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
 	private _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
 	readonly onDidChangeTreeData: vscode.Event<void> = this._onDidChangeTreeData.event;
+
+	private nestedWorkspaces: string[];
+
+    constructor(nestedWorkspaces: string[]) {
+        this.nestedWorkspaces = nestedWorkspaces;
+    }
 
 	getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
 		return element;
@@ -14,6 +32,19 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 	getChildren(element?: vscode.TreeItem): Thenable<vscode.TreeItem[]> {
 		if (!element) {
 			return Promise.resolve(this.getSections());
+		}
+
+		if (element.contextValue === 'nestedWorkspacesParent') {
+			// Return the list of nested workspaces under "Nested Workspaces"
+			const workspaceItems = this.nestedWorkspaces.map(workspacePath => {
+				const workspaceName = path.basename(workspacePath);
+				return new NestedWorkspaceItem(workspaceName, workspacePath, vscode.TreeItemCollapsibleState.Collapsed);
+			});
+			return Promise.resolve(workspaceItems);
+		} else if (element.contextValue === 'nestedWorkspace') {
+			// Return the items for a specific nested workspace
+			const workspaceLabel = element.label?.toString() || '';
+			return Promise.resolve(this.getSectionsForWorkspace(workspaceLabel));
 		}
 
 		const label = this.getLabel(element.label);
@@ -33,6 +64,15 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 	private getSections(): vscode.TreeItem[] {
 		const sections: vscode.TreeItem[] = [];
 
+		// Create the "Nested Workspaces" section
+		if (this.nestedWorkspaces.length > 0) {
+			const nestedWorkspacesSection = new vscode.TreeItem('Nested Workspaces', vscode.TreeItemCollapsibleState.Expanded);
+			nestedWorkspacesSection.iconPath = new vscode.ThemeIcon('folder');
+			nestedWorkspacesSection.contextValue = 'nestedWorkspacesParent';
+	
+			sections.push(nestedWorkspacesSection);
+		}
+
 		const scripts = new vscode.TreeItem('Scripts', vscode.TreeItemCollapsibleState.Expanded);
 		scripts.iconPath = new vscode.ThemeIcon('terminal-view-icon');
 
@@ -47,7 +87,7 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 		const devDependencies = new vscode.TreeItem(`Dev Dependencies (${devDependenciesCount})`, vscode.TreeItemCollapsibleState.Expanded);
 		devDependencies.iconPath = new vscode.ThemeIcon('package');
 
-		sections.push(scripts, actions, new vscode.TreeItem(''), dependencies, devDependencies);
+		sections.push(new vscode.TreeItem(''), scripts, actions, new vscode.TreeItem(''), dependencies, devDependencies);
 
 		return sections;
 	}
@@ -70,111 +110,133 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 		return Object.keys(dependencies || {}).length;
 	}
 
-	private getCustomCommands(): vscode.TreeItem[] {
-		const customCommands = vscode.workspace.getConfiguration('pubStudio').get<{ [key: string]: string }>('customCommands', {});
-
+	private getCustomCommands(workspacePath?: string): vscode.TreeItem[] {
+		const rootPath = workspacePath || (vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '');
+		const customCommands = vscode.workspace.getConfiguration('pubStudio', vscode.Uri.file(rootPath)).get<{ [key: string]: string }>('customCommands', {});
+	
 		return Object.keys(customCommands).map(key => {
 			const command = customCommands[key];
-			return this.createScriptItem(key, command);
+			return this.createScriptItem(key, command, rootPath);
 		});
 	}
+	
 
-	private getCommandsFromMakefile(): vscode.TreeItem[] {
-		const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
-		if (!workspaceFolder) {
+	private getCommandsFromMakefile(workspacePath?: string): vscode.TreeItem[] {
+		const rootPath = workspacePath || (vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '');
+		if (!rootPath) {
 			return [];
 		}
-
-		const makefilePath = path.join(workspaceFolder, 'Makefile');
+	
+		const makefilePath = path.join(rootPath, 'Makefile');
 		if (!fs.existsSync(makefilePath)) {
 			return [];
 		}
-
+	
 		const fileContent = fs.readFileSync(makefilePath, 'utf8');
-
+	
 		const firstTargetRegex = new RegExp('(^[a-zA-Z0-9_.][a-zA-Z0-9-_]+):', 'g');
 		const firstTarget = firstTargetRegex.exec(fileContent)?.[0];
-
+	
 		let commands = [];
-
+	
 		if (firstTarget) {
-			commands.push(this.createMakefileTargetScriptItem(firstTarget));
+			commands.push(this.createMakefileTargetScriptItem(firstTarget, rootPath));
 		}
-
+	
 		const regex = new RegExp('([\n\r][a-zA-Z0-9_.][a-zA-Z0-9-_]+):', 'g');
 		let match;
-
+	
 		while (match = regex.exec(fileContent)) {
-			commands.push(this.createMakefileTargetScriptItem(match[0]));
+			commands.push(this.createMakefileTargetScriptItem(match[0], rootPath));
 		}
 		return commands;
 	}
 
-	private createMakefileTargetScriptItem(target: string): vscode.TreeItem {
+	private createMakefileTargetScriptItem(target: string, workspacePath: string): vscode.TreeItem {
 		target = target.substring(0, target.length - 1).trim();
-		return this.createScriptItem(target, `make ${target}`);
+		return this.createScriptItem(target, `make ${target}`, workspacePath);
 	}
 
-	private getScripts(): vscode.TreeItem[] {
-		return [
-			this.createScriptItem('Flutter clean', 'flutter clean'),
-			this.createScriptItem('Upgrade dependencies', 'flutter pub upgrade --major-versions'),
-			this.createScriptItem('Static analysis', 'dart analyze .'),
-			this.createScriptItem('View available dart fixes', 'dart fix --dry-run'),
-			this.createScriptItem('Apply available dart fixes', 'dart fix --apply'),
-			this.createScriptItem('Format dart files', 'dart format .'),
-			...this.getCustomCommands(),
-			...this.getCommandsFromMakefile(),
-		];
+	private getSectionsForWorkspace(workspaceName: string): vscode.TreeItem[] {
+        const sections: vscode.TreeItem[] = [];
+
+        const workspacePath = this.nestedWorkspaces.find(ws => path.basename(ws) === workspaceName);
+
+        if (workspacePath) {
+            const scripts = this.getScripts(workspacePath);
+            const actions = this.getActions(workspacePath);
+            const dependencies = this.getDependencies(false, workspacePath);
+            const devDependencies = this.getDependencies(true, workspacePath);
+
+            sections.push(...scripts, ...actions, ...dependencies, ...devDependencies);
+        }
+
+        return sections;
+    }
+
+	private getScripts(workspacePath?: string): vscode.TreeItem[] {
+		const scripts: vscode.TreeItem[] = [];
+		const rootPath = workspacePath || (vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '');
+		
+		scripts.push(this.createScriptItem('Flutter clean', 'flutter clean', rootPath));
+		scripts.push(this.createScriptItem('Upgrade dependencies', 'flutter pub upgrade --major-versions', rootPath));
+		scripts.push(this.createScriptItem('Static analysis', 'dart analyze .', rootPath));
+		scripts.push(this.createScriptItem('View available dart fixes', 'dart fix --dry-run', rootPath));
+		scripts.push(this.createScriptItem('Apply available dart fixes', 'dart fix --apply', rootPath));
+		scripts.push(this.createScriptItem('Format dart files', 'dart format .', rootPath));
+		
+		scripts.push(...this.getCustomCommands(rootPath));
+		scripts.push(...this.getCommandsFromMakefile(rootPath));
+		
+		return scripts;
 	}
 
-	private getActions(): vscode.TreeItem[] {
+	private getActions(workspacePath?: string): vscode.TreeItem[] {
+		const actions: vscode.TreeItem[] = [];
+		const rootPath = workspacePath || (vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '');
+	
 		const installAll = new vscode.TreeItem('Install All Dependencies');
-		installAll.command = { command: 'pub-studio.installAllDependencies', title: 'Install All Dependencies' };
+		installAll.command = { command: 'pub-studio.installAllDependencies', title: 'Install All Dependencies', arguments: [rootPath] };
 		installAll.iconPath = new vscode.ThemeIcon('cloud-download');
-
+	
 		const sortDependencies = new vscode.TreeItem('Sort All Dependencies');
-		sortDependencies.command = { command: 'pub-studio.sortDependencies', title: 'Sort All Dependencies' };
+		sortDependencies.command = { command: 'pub-studio.sortDependencies', title: 'Sort All Dependencies', arguments: [rootPath] };
 		sortDependencies.iconPath = new vscode.ThemeIcon('sort-precedence');
-
+	
 		const addDependency = new vscode.TreeItem('Add Dependency');
-		addDependency.command = { command: 'pub-studio.addDependency', title: 'Add Dependency' };
+		addDependency.command = { command: 'pub-studio.addDependency', title: 'Add Dependency', arguments: [rootPath] };
 		addDependency.iconPath = new vscode.ThemeIcon('add');
-
+	
 		const addDevDependency = new vscode.TreeItem('Add Dev Dependency');
-		addDevDependency.command = { command: 'pub-studio.addDevDependency', title: 'Add Dev Dependency' };
+		addDevDependency.command = { command: 'pub-studio.addDevDependency', title: 'Add Dev Dependency', arguments: [rootPath] };
 		addDevDependency.iconPath = new vscode.ThemeIcon('add');
-
+	
 		const removeUnusedDependencies = new vscode.TreeItem('Remove Unused Dependencies');
-		removeUnusedDependencies.command = { command: 'pub-studio.removeUnusedDependencies', title: 'Remove Unused Dependencies' };
+		removeUnusedDependencies.command = { command: 'pub-studio.removeUnusedDependencies', title: 'Remove Unused Dependencies', arguments: [rootPath] };
 		removeUnusedDependencies.iconPath = new vscode.ThemeIcon('trash');
-
+	
 		const removeUnusedImports = new vscode.TreeItem('Remove Unused Imports');
-		removeUnusedImports.command = { command: 'pub-studio.findRemoveUnusedImports', title: 'Remove Unused Imports' };
+		removeUnusedImports.command = { command: 'pub-studio.findRemoveUnusedImports', title: 'Remove Unused Imports', arguments: [rootPath] };
 		removeUnusedImports.iconPath = new vscode.ThemeIcon('trash');
-
+	
 		return [installAll, sortDependencies, addDependency, addDevDependency, removeUnusedDependencies, removeUnusedImports];
 	}
 
-	private getDependencies(isDevDependency: boolean): vscode.TreeItem[] {
+	private getDependencies(isDevDependency: boolean, workspacePath?: string): vscode.TreeItem[] {
 		const packages: vscode.TreeItem[] = [];
-		const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
-		if (!workspaceFolder) {
-			vscode.window.showErrorMessage('No workspace folder found');
-			return packages;
-		}
-
-		const pubspecPath = path.join(workspaceFolder, 'pubspec.yaml');
+		const rootPath = workspacePath || (vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '');
+	
+		const pubspecPath = path.join(rootPath, 'pubspec.yaml');
 		if (!fs.existsSync(pubspecPath)) {
 			vscode.window.showErrorMessage('pubspec.yaml not found in workspace');
 			return packages;
 		}
-
+	
 		const fileContent = fs.readFileSync(pubspecPath, 'utf8');
 		const pubspec = yaml.parse(fileContent);
-
+	
 		const dependencies = isDevDependency ? pubspec.dev_dependencies : pubspec.dependencies;
-
+	
 		for (const [key, value] of Object.entries(dependencies || {})) {
 			const formattedValue = this.formatDependencyValue(value);
 			const item = new vscode.TreeItem(`${key} ${formattedValue}`);
@@ -187,9 +249,10 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 			item.iconPath = new vscode.ThemeIcon('library');
 			packages.push(item);
 		}
-
+	
 		return packages;
 	}
+	
 
 	private formatDependencyValue(value: any): string {
 		if (typeof value === 'string') {
@@ -216,10 +279,10 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 		return JSON.stringify(git);
 	}
 
-	private createScriptItem(label: string, command: string): vscode.TreeItem {
+	private createScriptItem(label: string, command: string, workspacePath?: string): vscode.TreeItem {
 		const item = new vscode.TreeItem(label);
 		item.iconPath = new vscode.ThemeIcon('terminal');
-		item.command = { command: 'pub-studio.runScript', title: label, arguments: [command] };
+		item.command = { command: 'pub-studio.runScript', title: label, arguments: [command, workspacePath] };
 		return item;
 	}
 
