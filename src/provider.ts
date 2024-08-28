@@ -45,6 +45,18 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 			// Return the items for a specific nested workspace
 			const workspaceLabel = element.label?.toString() || '';
 			return Promise.resolve(this.getSectionsForWorkspace(workspaceLabel));
+		} else if (element.contextValue === 'workspaceScripts') {
+			// Return the scripts for the specific workspace
+			return Promise.resolve(this.getScripts(element.resourceUri?.fsPath));
+		} else if (element.contextValue === 'workspaceActions') {
+			// Return the actions for the specific workspace
+			return Promise.resolve(this.getActions(element.resourceUri?.fsPath));
+		} else if (element.contextValue === 'workspaceDependencies') {
+			// Return the dependencies for the specific workspace
+			return Promise.resolve(this.getDependencies(false, element.resourceUri?.fsPath));
+		} else if (element.contextValue === 'workspaceDevDependencies') {
+			// Return the dev dependencies for the specific workspace
+			return Promise.resolve(this.getDependencies(true, element.resourceUri?.fsPath));
 		}
 
 		const label = this.getLabel(element.label);
@@ -158,21 +170,40 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 	}
 
 	private getSectionsForWorkspace(workspaceName: string): vscode.TreeItem[] {
-        const sections: vscode.TreeItem[] = [];
+		const sections: vscode.TreeItem[] = [];
+	
+		const workspacePath = this.nestedWorkspaces.find(ws => path.basename(ws) === workspaceName);
+	
+		if (workspacePath) {
+			// Create "Scripts" section
+			const scriptsSection = new vscode.TreeItem('Scripts', vscode.TreeItemCollapsibleState.Collapsed);
+			scriptsSection.contextValue = 'workspaceScripts';
+			scriptsSection.iconPath = new vscode.ThemeIcon('terminal');
+			sections.push(scriptsSection);
+	
+			// Create "Actions" section
+			const actionsSection = new vscode.TreeItem('Actions', vscode.TreeItemCollapsibleState.Collapsed);
+			actionsSection.contextValue = 'workspaceActions';
+			actionsSection.iconPath = new vscode.ThemeIcon('tools');
+			sections.push(actionsSection);
 
-        const workspacePath = this.nestedWorkspaces.find(ws => path.basename(ws) === workspaceName);
-
-        if (workspacePath) {
-            const scripts = this.getScripts(workspacePath);
-            const actions = this.getActions(workspacePath);
-            const dependencies = this.getDependencies(false, workspacePath);
-            const devDependencies = this.getDependencies(true, workspacePath);
-
-            sections.push(...scripts, ...actions, ...dependencies, ...devDependencies);
-        }
-
-        return sections;
-    }
+			sections.push(new vscode.TreeItem(''));
+	
+			// Create "Dependencies" section
+			const dependenciesSection = new vscode.TreeItem(`Dependencies`, vscode.TreeItemCollapsibleState.Collapsed);
+			dependenciesSection.contextValue = 'workspaceDependencies';
+			dependenciesSection.iconPath = new vscode.ThemeIcon('package');
+			sections.push(dependenciesSection);
+	
+			// Create "Dev Dependencies" section
+			const devDependenciesSection = new vscode.TreeItem(`Dev Dependencies`, vscode.TreeItemCollapsibleState.Collapsed);
+			devDependenciesSection.contextValue = 'workspaceDevDependencies';
+			devDependenciesSection.iconPath = new vscode.ThemeIcon('package');
+			sections.push(devDependenciesSection);
+		}
+	
+		return sections;
+	}
 
 	private getScripts(workspacePath?: string): vscode.TreeItem[] {
 		const scripts: vscode.TreeItem[] = [];
@@ -192,7 +223,6 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 	}
 
 	private getActions(workspacePath?: string): vscode.TreeItem[] {
-		const actions: vscode.TreeItem[] = [];
 		const rootPath = workspacePath || (vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '');
 	
 		const installAll = new vscode.TreeItem('Install All Dependencies');
