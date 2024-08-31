@@ -233,30 +233,38 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 		const rootPath = workspacePath || (vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '');
 	
 		const installAll = new vscode.TreeItem('Install All Dependencies');
+		if(workspacePath)installAll.resourceUri = vscode.Uri.file(workspacePath);
 		installAll.command = { command: 'pub-studio.installAllDependencies', title: 'Install All Dependencies', arguments: [rootPath] };
 		installAll.iconPath = new vscode.ThemeIcon('cloud-download');
 	
 		const sortDependencies = new vscode.TreeItem('Sort All Dependencies');
+		if(workspacePath)sortDependencies.resourceUri = vscode.Uri.file(workspacePath);
 		sortDependencies.command = { command: 'pub-studio.sortDependencies', title: 'Sort All Dependencies', arguments: [rootPath] };
 		sortDependencies.iconPath = new vscode.ThemeIcon('sort-precedence');
 	
 		const addDependency = new vscode.TreeItem('Add Dependency');
+		if(workspacePath)addDependency.resourceUri = vscode.Uri.file(workspacePath);
 		addDependency.command = { command: 'pub-studio.addDependency', title: 'Add Dependency', arguments: [rootPath] };
 		addDependency.iconPath = new vscode.ThemeIcon('add');
 	
 		const addDevDependency = new vscode.TreeItem('Add Dev Dependency');
+		if(workspacePath)addDevDependency.resourceUri = vscode.Uri.file(workspacePath);
 		addDevDependency.command = { command: 'pub-studio.addDevDependency', title: 'Add Dev Dependency', arguments: [rootPath] };
 		addDevDependency.iconPath = new vscode.ThemeIcon('add');
 	
 		const removeUnusedDependencies = new vscode.TreeItem('Remove Unused Dependencies');
+		if(workspacePath)removeUnusedDependencies.resourceUri = vscode.Uri.file(workspacePath);
 		removeUnusedDependencies.command = { command: 'pub-studio.removeUnusedDependencies', title: 'Remove Unused Dependencies', arguments: [rootPath] };
 		removeUnusedDependencies.iconPath = new vscode.ThemeIcon('trash');
 	
 		const removeUnusedImports = new vscode.TreeItem('Remove Unused Imports');
+		if(workspacePath)removeUnusedImports.resourceUri = vscode.Uri.file(workspacePath);
 		removeUnusedImports.command = { command: 'pub-studio.findRemoveUnusedImports', title: 'Remove Unused Imports', arguments: [rootPath] };
 		removeUnusedImports.iconPath = new vscode.ThemeIcon('trash');
 	
-		return [installAll, sortDependencies, addDependency, addDevDependency, removeUnusedDependencies, removeUnusedImports];
+		const allActions = [installAll, sortDependencies, addDependency, addDevDependency, removeUnusedDependencies, removeUnusedImports];
+
+		return allActions;
 	}
 
 	private getDependencies(isDevDependency: boolean, workspacePath?: string): vscode.TreeItem[] {
@@ -278,6 +286,7 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 			const formattedValue = this.formatDependencyValue(value);
 			const item = new vscode.TreeItem(`${key} ${formattedValue}`);
 			item.contextValue = isDevDependency ? 'devDependency' : 'dependency';
+			if(workspacePath)item.resourceUri = vscode.Uri.file(workspacePath);
 			item.command = {
 				command: 'pub-studio.viewDependency',
 				title: 'View Dependency',
@@ -319,6 +328,7 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 	private createScriptItem(label: string, command: string, workspacePath?: string): vscode.TreeItem {
 		const item = new vscode.TreeItem(label);
 		item.iconPath = new vscode.ThemeIcon('terminal');
+		if(workspacePath)item.resourceUri = vscode.Uri.file(workspacePath);
 		item.command = { command: 'pub-studio.runScript', title: label, arguments: [command, workspacePath] };
 		return item;
 	}
