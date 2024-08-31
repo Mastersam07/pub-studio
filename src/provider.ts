@@ -290,7 +290,7 @@ export class PackageManagerProvider implements vscode.TreeDataProvider<vscode.Tr
 			item.command = {
 				command: 'pub-studio.viewDependency',
 				title: 'View Dependency',
-				arguments: [item]
+				arguments: [item, rootPath]
 			};
 			item.iconPath = new vscode.ThemeIcon('library');
 			packages.push(item);
