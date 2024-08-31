@@ -22,7 +22,6 @@ function findNestedWorkspaces(rootPath: string): string[] {
             const pubspecPath = path.join(folderPath, 'pubspec.yaml');
 
             if (fs.existsSync(pubspecPath)) {
-				console.log('nested folderPath:', folderPath)
                 nestedWorkspaces.push(folderPath);
             } else {
                 nestedWorkspaces.push(...findNestedWorkspaces(folderPath));
@@ -60,35 +59,42 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.commands.registerCommand('pub-studio.openFlutterPackageManager', () => {
 				vscode.commands.executeCommand('workbench.view.extension.flutterPackageManager');
 			}),
-			vscode.commands.registerCommand('pub-studio.installAllDependencies', () => {
-				manageDependencies('flutter pub get', outputChannel, (_) => sortPubspecDependencies());
+			vscode.commands.registerCommand('pub-studio.installAllDependencies', (workspacePath?: string) => {
+				manageDependencies('flutter pub get', outputChannel, (_) => sortPubspecDependencies(workspacePath), workspacePath);
 			}),
-			vscode.commands.registerCommand('pub-studio.removeUnusedDependencies', () => {
-				removeUnusedDependencies(outputChannel);
+			vscode.commands.registerCommand('pub-studio.removeUnusedDependencies', (workspacePath?: string) => {
+				removeUnusedDependencies(outputChannel, workspacePath);
 			}),
-			vscode.commands.registerCommand('pub-studio.addDependency', () => {
-				addDependency(false, outputChannel, packageManagerProvider);
+			vscode.commands.registerCommand('pub-studio.addDependency', (workspacePath?: string) => {
+				addDependency(false, outputChannel, packageManagerProvider, workspacePath);
 			}),
-			vscode.commands.registerCommand('pub-studio.addDevDependency', () => {
-				addDependency(true, outputChannel, packageManagerProvider);
+			vscode.commands.registerCommand('pub-studio.addDevDependency', (workspacePath?: string) => {
+				addDependency(true, outputChannel, packageManagerProvider, workspacePath);
 			}),
-			vscode.commands.registerCommand('pub-studio.sortDependencies', () => {
-				sortPubspecDependencies();
+			vscode.commands.registerCommand('pub-studio.sortDependencies', (workspacePath?: string) => {
+				sortPubspecDependencies(workspacePath);
 			}),
 			vscode.commands.registerCommand('pub-studio.updateDependency', (item: vscode.TreeItem) => {
-				updateDependency(item, outputChannel, packageManagerProvider);
+				const workspacePath = item.resourceUri?.fsPath;
+				updateDependency(item, outputChannel, packageManagerProvider, workspacePath);
 			}),
 			vscode.commands.registerCommand('pub-studio.removeDependency', (item: vscode.TreeItem) => {
-				removeDependency(item, outputChannel, packageManagerProvider);
+				const workspacePath = item.resourceUri?.fsPath;
+				removeDependency(item, outputChannel, packageManagerProvider, workspacePath);
 			}),
 			vscode.commands.registerCommand('pub-studio.viewDependency', (item: vscode.TreeItem) => {
-				revealDependencyInPubspec(item);
+				const workspacePath = item.resourceUri?.fsPath;
+				revealDependencyInPubspec(item, workspacePath);
 			}),
-			vscode.commands.registerCommand('pub-studio.runScript', (command: string) => {
-				runScript(command, outputChannel);
+			vscode.commands.registerCommand('pub-studio.runScript', (command: string, item: vscode.TreeItem) => {
+				const workspacePath = item.resourceUri?.fsPath;
+				console.log('item:', item)
+				runScript(command, outputChannel, workspacePath);
 			}),
-			vscode.commands.registerCommand('pub-studio.findRemoveUnusedImports', () => {
-				findRemoveUnusedImports(outputChannel);
+			vscode.commands.registerCommand('pub-studio.findRemoveUnusedImports', (item: vscode.TreeItem) => {
+				const workspacePath = item.resourceUri?.fsPath;
+				console.log('item:', item)
+				findRemoveUnusedImports(outputChannel, workspacePath);
 			}),
 		);
 

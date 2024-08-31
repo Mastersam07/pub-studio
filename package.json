@@ -38,42 +38,51 @@
   "activationEvents": [
     "workspaceContains:pubspec.yaml",
     "workspaceContains:*/pubspec.yaml",
-    "workspaceContains:*/*/pubspec.yaml"
+    "workspaceContains:*/*/pubspec.yaml",
+    "workspaceContains:**/pubspec.yaml"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "pub-studio.installAllDependencies",
-        "title": "Pub Studio: Install All Dependencies"
+        "title": "Pub Studio: Install All Dependencies",
+        "arguments": ["${workspaceFolder}"]
       },
       {
         "command": "pub-studio.removeUnusedDependencies",
-        "title": "Pub Studio: Remove Unused Dependencies"
+        "title": "Pub Studio: Remove Unused Dependencies",
+        "arguments": ["${workspaceFolder}"]
       },
       {
         "command": "pub-studio.sortDependencies",
-        "title": "Pub Studio: Sort All Dependencies"
+        "title": "Pub Studio: Sort All Dependencies",
+        "arguments": ["${workspaceFolder}"]
       },
       {
         "command": "pub-studio.addDependency",
-        "title": "Pub Studio: Add Dependency"
+        "title": "Pub Studio: Add Dependency",
+        "arguments": ["${workspaceFolder}"]
       },
       {
         "command": "pub-studio.addDevDependency",
-        "title": "Pub Studio: Add Dev Dependency"
+        "title": "Pub Studio: Add Dev Dependency",
+        "arguments": ["${workspaceFolder}"]
       },
       {
         "command": "pub-studio.updateDependency",
-        "title": "Pub Studio: Update Dependency"
+        "title": "Pub Studio: Update Dependency",
+        "arguments": ["${workspaceFolder}"]
       },
       {
         "command": "pub-studio.removeDependency",
-        "title": "Pub Studio: Remove Dependency"
+        "title": "Pub Studio: Remove Dependency",
+        "arguments": ["${workspaceFolder}"]
       },
       {
         "command": "pub-studio.findRemoveUnusedImports",
-        "title": "Pub Studio: Remove Unused Imports"
+        "title": "Pub Studio: Remove Unused Imports",
+        "arguments": ["${workspaceFolder}"]
       }
     ],
     "viewsContainers": {
@@ -97,12 +106,12 @@
       "view/item/context": [
         {
           "command": "pub-studio.updateDependency",
-          "when": "viewItem == dependency || viewItem == devDependency",
+          "when": "viewItem == dependency || viewItem == devDependency || viewItem == nestedWorkspace",
           "group": "1_modification"
         },
         {
           "command": "pub-studio.removeDependency",
-          "when": "viewItem == dependency || viewItem == devDependency",
+          "when": "viewItem == dependency || viewItem == devDependency || viewItem == nestedWorkspace",
           "group": "2_modification"
         }
       ]
