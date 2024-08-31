@@ -86,14 +86,11 @@ export function activate(context: vscode.ExtensionContext) {
 				const workspacePath = item.resourceUri?.fsPath;
 				revealDependencyInPubspec(item, workspacePath);
 			}),
-			vscode.commands.registerCommand('pub-studio.runScript', (command: string, item: vscode.TreeItem) => {
-				const workspacePath = item.resourceUri?.fsPath;
-				console.log('item:', item)
+			vscode.commands.registerCommand('pub-studio.runScript', (command: string, workspacePath?: string) => {
 				runScript(command, outputChannel, workspacePath);
 			}),
 			vscode.commands.registerCommand('pub-studio.findRemoveUnusedImports', (item: vscode.TreeItem) => {
 				const workspacePath = item.resourceUri?.fsPath;
-				console.log('item:', item)
 				findRemoveUnusedImports(outputChannel, workspacePath);
 			}),
 		);

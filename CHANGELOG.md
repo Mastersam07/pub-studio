@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.3.0
+
+- Feat: support for nested workspaces
+
 ## 0.2.6
 
 - Fix: unneccessary prompt

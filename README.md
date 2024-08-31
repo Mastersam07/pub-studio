@@ -66,6 +66,10 @@ Pub Studio adds an icon to the VS Code sidebar. Clicking on this icon will open 
 - **View Dependencies**: Displays all project dependencies. Right-click on a dependency to update or remove it.
 - **View Dev Dependencies**: Displays all dev dependencies. Right-click on a dev dependency to update or remove it.
 
+#### Nested Workspaces
+- **Workspace-Specific Management**: Manage scripts, actions, dependencies, and dev dependencies for each nested workspace individually.
+- **Unified View**: All nested workspaces are displayed under a unified view in the Pub Studio sidebar, allowing for easy navigation and management.
+
 ## Commands
 
 Pub Studio provides several commands accessible from the command palette (`Cmd+Shift+P` or `Ctrl+Shift+P`):
