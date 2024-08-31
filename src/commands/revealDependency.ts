@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 
-export async function revealDependencyInPubspec(item: vscode.TreeItem) {
+export async function revealDependencyInPubspec(item: vscode.TreeItem, workspacePath?: string) {
 	const label = typeof item.label === 'string' ? item.label : item.label?.label;
 	if (!label) {
 		vscode.window.showErrorMessage('Invalid package name');
@@ -10,13 +10,13 @@ export async function revealDependencyInPubspec(item: vscode.TreeItem) {
 	}
 
 	const packageName = label.split(' ')[0];
-	const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
-	if (!workspaceFolder) {
+	const targetFolder = workspacePath || (vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '');
+	if (!targetFolder) {
 		vscode.window.showErrorMessage('No workspace folder found');
 		return;
 	}
 
-	const pubspecPath = path.join(workspaceFolder, 'pubspec.yaml');
+	const pubspecPath = path.join(targetFolder, 'pubspec.yaml');
 	if (!fs.existsSync(pubspecPath)) {
 		vscode.window.showErrorMessage('pubspec.yaml not found in workspace');
 		return;

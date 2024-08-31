@@ -5,14 +5,14 @@ import { parseDocument, YAMLMap } from 'yaml';
 import { sortPubspecDependencies } from './sortDependencies';
 import { glob } from 'glob';
 
-export async function removeUnusedDependencies(outputChannel: vscode.OutputChannel) {
-    const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
-    if (!workspaceFolder) {
+export async function removeUnusedDependencies(outputChannel: vscode.OutputChannel, workspacePath?: string) {
+    const targetFolder = workspacePath || (vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '');
+    if (!targetFolder) {
         vscode.window.showErrorMessage('No workspace folder found');
         return;
     }
 
-    const pubspecPath = path.join(workspaceFolder, 'pubspec.yaml');
+    const pubspecPath = path.join(targetFolder, 'pubspec.yaml');
     if (!fs.existsSync(pubspecPath)) {
         vscode.window.showErrorMessage('pubspec.yaml not found in workspace');
         return;
@@ -24,7 +24,7 @@ export async function removeUnusedDependencies(outputChannel: vscode.OutputChann
         cancellable: false
     }, async (_, __) => {
         try {
-            const usedDependencies = await findUsedDependencies(workspaceFolder);
+            const usedDependencies = await findUsedDependencies(targetFolder);
             const fileContent = fs.readFileSync(pubspecPath, 'utf8');
             const doc = parseDocument(fileContent);
 

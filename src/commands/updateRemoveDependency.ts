@@ -3,7 +3,7 @@ import { PackageManagerProvider } from '../provider';
 import { manageDependencies } from './manageDependencies';
 import { sortPubspecDependencies } from './sortDependencies';
 
-export function updateDependency(item: vscode.TreeItem, outputChannel: vscode.OutputChannel, provider: PackageManagerProvider) {
+export function updateDependency(item: vscode.TreeItem, outputChannel: vscode.OutputChannel, provider: PackageManagerProvider, workspacePath?: string) {
     if (!item) return;
     const label = typeof item.label === 'string' ? item.label : item.label?.label;
     if (!label) {
@@ -27,7 +27,7 @@ export function updateDependency(item: vscode.TreeItem, outputChannel: vscode.Ou
                         sortPubspecDependencies();
                         resolve();
                     }
-                });
+                }, workspacePath);
             });
             vscode.window.showInformationMessage(`Successfully updated dependency: ${packageName}`);
         } catch (error) {
@@ -41,7 +41,7 @@ export function updateDependency(item: vscode.TreeItem, outputChannel: vscode.Ou
     });
 }
 
-export function removeDependency(item: vscode.TreeItem, outputChannel: vscode.OutputChannel, provider: PackageManagerProvider) {
+export function removeDependency(item: vscode.TreeItem, outputChannel: vscode.OutputChannel, provider: PackageManagerProvider, workspacePath?: string) {
     if (!item) return;
     const label = typeof item.label === 'string' ? item.label : item.label?.label;
     if (!label) {
@@ -65,7 +65,7 @@ export function removeDependency(item: vscode.TreeItem, outputChannel: vscode.Ou
                         sortPubspecDependencies();
                         resolve();
                     }
-                });
+                }, workspacePath);
             });
             vscode.window.showInformationMessage(`Successfully removed dependency: ${packageName}`);
         } catch (error) {

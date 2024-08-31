@@ -4,13 +4,13 @@ import * as fs from 'fs';
 import { parseDocument, YAMLMap } from 'yaml';
 import { sortMapKeys } from '../utils/sortMap';
 
-export function sortPubspecDependencies() {
-	const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
-	if (!workspaceFolder) {
+export function sortPubspecDependencies(workspacePath?: string) {
+	const targetFolder = workspacePath || (vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '');
+	if (!targetFolder) {
 		return;
 	}
 
-	const pubspecPath = path.join(workspaceFolder, 'pubspec.yaml');
+	const pubspecPath = path.join(targetFolder, 'pubspec.yaml');
 	if (!fs.existsSync(pubspecPath)) {
 		return;
 	}

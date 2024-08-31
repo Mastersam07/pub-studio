@@ -4,7 +4,7 @@ import { manageDependencies } from "./manageDependencies";
 import { sortPubspecDependencies } from "./sortDependencies";
 import { showPackageInputBox } from "../utils/showPackageInputBox";
 
-export function addDependency(isDev: boolean, outputChannel: vscode.OutputChannel, provider: PackageManagerProvider) {
+export function addDependency(isDev: boolean, outputChannel: vscode.OutputChannel, provider: PackageManagerProvider, workspacePath?: string) {
     showPackageInputBox(isDev).then(packageNames => {
         if (packageNames) {
             const packages = packageNames.split(',').map(pkg => pkg.trim());
@@ -21,10 +21,10 @@ export function addDependency(isDev: boolean, outputChannel: vscode.OutputChanne
                             if (err) {
                                 reject(err);
                             } else {
-                                sortPubspecDependencies();
+                                sortPubspecDependencies(workspacePath);
                                 resolve();
                             }
-                        });
+                        }, workspacePath);
                     });
                     vscode.window.showInformationMessage(`Successfully added dependencies: ${packageNames}`);
                 } catch (error) {
