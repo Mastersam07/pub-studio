@@ -22,6 +22,7 @@ function findNestedWorkspaces(rootPath: string): string[] {
             const pubspecPath = path.join(folderPath, 'pubspec.yaml');
 
             if (fs.existsSync(pubspecPath)) {
+				console.log('nested folderPath:', folderPath)
                 nestedWorkspaces.push(folderPath);
             } else {
                 nestedWorkspaces.push(...findNestedWorkspaces(folderPath));
